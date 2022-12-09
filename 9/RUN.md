@@ -1,7 +1,8 @@
 ### Deps
 
-- Curl (libcurl)
-- Libc
+- curl (libcurl)
+- libc
+- zig
 
 ### Running
 
