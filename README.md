@@ -30,8 +30,8 @@ A RUN.md file exists for evey solution explaining how to run it.
 - **17**. **fortran** Didn't expect fortran to be this powerful, you see how old the language is by the syntax, but outside of that you get almost of modern language.
 - **18**. **common lisp** Not much documentation, and I wasn't really gonna read a whole book for a challenge. Being multiparadigme and having mutability is quite nice for parsing and some algorithms.
 - **19**. **v** Compilation was surpisingly slow, but (from what I understand) recompiling the entire v stdlib every time probably doesn't help, relatively fast language, and easy concurency let tme bruteforce part2 in about 10 min.
-- **20**. **dart**
-- **21**. **scala**
+- **20**. **ruby** Easy challenge, nice language with some cool features, a bit slow though.
+- **21**. **scala** Challenge was pretty simple, first time working with this kind of math thing (reducing expressions), scala is an interesting language, but felt really heavy (my shell prompt was slower, running the sbt command takes >1s), it wasn't actually that slow though (metals reacted instantly, and `~run` finished executing before I could switch the see the result). The language in itself is pretty good, but I'm not too convinced by the OOP.
 - **22**. **C#**
 - **23**. **python**
 - **24**. **C++**
