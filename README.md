@@ -32,7 +32,7 @@ A RUN.md file exists for evey solution explaining how to run it.
 - **19**. **v** Compilation was surpisingly slow, but (from what I understand) recompiling the entire v stdlib every time probably doesn't help, relatively fast language, and easy concurency let tme bruteforce part2 in about 10 min.
 - **20**. **ruby** Easy challenge, nice language with some cool features, a bit slow though.
 - **21**. **scala** Challenge was pretty simple, first time working with this kind of math thing (reducing expressions), scala is an interesting language, but felt really heavy (my shell prompt was slower, running the sbt command takes >1s), it wasn't actually that slow though (metals reacted instantly, and `~run` finished executing before I could switch the see the result). The language in itself is pretty good, but I'm not too convinced by the OOP.
-- **22**. **C#**
+- **22**. **C#** Can't say I've been charmed by the language, having seen all the ones above before, going back to a verbose, rigid language with a c like syntax isn't really fun, especially since you never benifit much from OOP in those challenges. Setting up was also a bit of a pain, and I ended up going without LSP because I coudldn't be bothered. Should be more convenient on Windows though. (Also for the challenge, creating a simple paper model of the cube really helped wrapping my head around the wrapping).
 - **23**. **python**
 - **24**. **C++**
 - **25**. **kotlin**
