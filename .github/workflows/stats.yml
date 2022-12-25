@@ -1,16 +1,13 @@
 name: Build and deploy Github pages
-on:
-  push:
-    branches:
-      - main
+on: [push]
 jobs:
   stats:
     name: Generate stats
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '2.x'
-      - run: gem install github-linguist --no-document
-      - run: github-linguist --json
+    - uses: actions/checkout@v3
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0'
+    - run: gem install github-linguist
+    - run: github-linguist --json
