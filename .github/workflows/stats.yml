@@ -1,0 +1,17 @@
+name: Build and deploy Github pages
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    name: Generate stats
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout
+      - uses: actions/checkout@main
+      - uses: actions/setup-ruby
+        with:
+          ruby-version: '2.x'
+      - run: gem install github-linguist --no-document
+      - run: github-linguist --json
