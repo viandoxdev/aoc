@@ -21,7 +21,7 @@ jobs:
     - name: Push to branch
       uses: s0/git-publish-subdir-action@develop
       env:
-        REOP: self
+        REPO: self
         BRANCH: artifacts
         FOLDER: assets
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
