@@ -1,0 +1,4 @@
+# requirements for the langs.py script, see lang.py for usage
+pycairo==1.20.1
+PyYAML==6.0
+requests==2.28.1
