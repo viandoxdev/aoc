@@ -2,8 +2,8 @@
 
 Advent of code 2022 solutions in a different language everyday
 
-![courtesy of a modified langstats (pip)](./.github/langs_dark.svg#gh-dark-mode-only)
-![courtesy of a modified langstats (pip)](./.github/langs_light.svg#gh-light-mode-only)
+![](https://raw.githubusercontent.com/viandoxdev/aoc2022/artifacts/langs_dark.svg#gh-dark-mode-only)
+![](https://raw.githubusercontent.com/viandoxdev/aoc2022/artifacts/langs_light.svg#gh-light-mode-only)
 
 ## Running
 
