@@ -8,8 +8,7 @@ jobs:
     name: Generate stats
     runs-on: ubuntu-latest
     steps:
-      # Checkout
-      - uses: actions/checkout@main
+      - uses: actions/checkout
       - uses: actions/setup-ruby
         with:
           ruby-version: '2.x'
