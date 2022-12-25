@@ -4,12 +4,12 @@ on:
     branches:
       - main
 jobs:
-  build:
+  stats:
     name: Generate stats
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout
-      - uses: actions/setup-ruby
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '2.x'
       - run: gem install github-linguist --no-document
