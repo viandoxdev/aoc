@@ -9,5 +9,19 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.0'
-    - run: gem install github-linguist
-    - run: github-linguist --json
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: Install github linguist 
+      run: gem install github-linguist
+    - name: Install python dependencies
+      run: pip install -r requirements.txt
+    - name: Generate updated stats svg
+      run: python langs.py
+    - name: Push to branch
+      uses: s0/git-publish-subdir-action@develop
+      env:
+        REOP: self
+        BRANCH: artifacts
+        FOLDER: assets
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

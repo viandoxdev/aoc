@@ -193,5 +193,7 @@ data = {
     for k in sorted(linguist_out, reverse=True, key=lambda k: linguist_out[k]["size"])
 }
 
-render(".github/langs_dark.svg", COLORS['dark'], data)
-render(".github/langs_light.svg", COLORS['light'], data)
+os.makedirs("assets", exist_ok=True)
+
+render("assets/langs_dark.svg", COLORS['dark'], data)
+render("assets/langs_light.svg", COLORS['light'], data)
