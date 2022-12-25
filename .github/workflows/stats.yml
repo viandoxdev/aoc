@@ -1,4 +1,4 @@
-name: Build and deploy Github pages
+name: Generate svg stats
 on: [push]
 jobs:
   stats:
