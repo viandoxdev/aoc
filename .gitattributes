@@ -1,0 +1,29 @@
+*.md linguist-language=markdown
+Makefile linguist-language=make
+
+# not actually the case but vim keystrokes isn't a real language anyways
+keystrokes linguist-language=viml
+
+**/*.sh	linguist-language=bash
+**/*.c	linguist-language=c
+**/*.rs	linguist-language=rust
+**/*.s	linguist-language=gas
+**/*.hs	linguist-language=haskell
+**/*.lua	linguist-language=lua
+**/*.nim	linguist-language=nim
+**/*.awk	linguist-language=awk
+**/*.ex	linguist-language=elixir
+**/*.zig	linguist-language=zig
+**/*.b	linguist-language=brainfuck
+**/*.clj	linguist-language=clojure
+**/*.ml	linguist-language=ocaml
+**/*.js	linguist-language=javascript
+**/*.f95	linguist-language=Fortran-Free-Form
+**/*.lisp	linguist-language=Common-Lisp
+**/*.v	linguist-language=vlang
+**/*.rb	linguist-language=ruby
+**/*.scala	linguist-language=scala
+**/*.cs	linguist-language=csharp
+**/*.cpp	linguist-language=cpp
+**/*.kt	linguist-language=kotlin
+**/*.py	linguist-language=python
