@@ -5,7 +5,7 @@
 
 ## Running
 
-A RUN.md file exists for evey solution explaining how to run it.
+A RUN.md file exists for every solution explaining how to run it.
 
 > **Warning** 
 > Make sure to put your session token (with a newline at the end) in a file called session here.
