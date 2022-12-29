@@ -1,17 +1,9 @@
 module Challenges.Day1 where
 
-import Aoc
-import Control.Applicative (ZipList(getZipList, ZipList))
-import Data.List (tails)
+import Utils (windows)
 
 parse :: (Integral n, Read n) => String -> [n]
 parse input = map read $ lines input
-
-transpose' :: [[a]] -> [[a]]
-transpose' = getZipList . traverse ZipList
-
-windows :: Int -> [a] -> [[a]]
-windows n = transpose' . take n . tails
 
 part1 :: Integral n => [n] -> n
 part1 l = fst $ foldl f (0, head l) l where

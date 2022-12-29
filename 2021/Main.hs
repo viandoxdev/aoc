@@ -7,6 +7,10 @@ import Challenges.Day3
 import Challenges.Day4
 import Challenges.Day5
 import Challenges.Day6
+import Challenges.Day7
+import Challenges.Day8
+import Challenges.Day9
+import Challenges.Day10
 
 runDay :: (Show n, Integral n) => Aoc -> n -> (String -> (String, String)) -> IO ()
 runDay aoc day f = do
@@ -27,12 +31,16 @@ dayDummy :: String -> (String, String)
 dayDummy _ = ("none", "none")
 
 days = 
-    [ day1
-    , day2 
-    , day3 
-    , day4 
-    , day5 
-    , day6 
+    [ ( 1,  day1)
+    , ( 2,  day2) 
+    , ( 3,  day3) 
+    , ( 4,  day4) 
+    , ( 5,  day5) 
+    , ( 6,  day6) 
+    , ( 7,  day7) 
+    , ( 8,  day8) 
+    , ( 9,  day9) 
+    , (10, day10) 
     ]
 
 main :: IO ()
@@ -41,7 +49,7 @@ main = do
     putStrLn "Aoc 2021"
     putStrLn ""
 
-    runDays aoc $ zip [1..] days
+    runDays aoc days
 
     putStrLn ""
     putStrLn "Done"

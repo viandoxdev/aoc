@@ -1,5 +1,5 @@
 CC=ghc
-FLAGS=-O2 #-prof -fprof-auto
+FLAGS=-O2 -g #-prof -fprof-auto
 BUILD_DIR=./build
 BIN=./aoc2021
 ARGS=#+RTS -p
