@@ -1,4 +1,4 @@
-module Challenges.Day9 where
+module Challenges.Day09 where
 import Data.Char (digitToInt)
 import Utils (windows, transpose', chunks)
 import Debug.Trace
@@ -41,8 +41,8 @@ flood grid point = runST $ do
     array <- newArray (bounds grid) False
     floodST array grid point
 
-day9 :: String -> (String, String)
-day9 str = ( show $ sum $ map (pointScore g) lps
+day09 :: String -> (String, String)
+day09 str = ( show $ sum $ map (pointScore g) lps
            , show $ product $ take 3 $ sortBy (flip compare) $ map (flood g) lps )
     where g = grid $ parse str
           lps = lowPoints g

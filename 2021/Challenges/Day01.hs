@@ -1,4 +1,4 @@
-module Challenges.Day1 where
+module Challenges.Day01 where
 
 import Utils (windows)
 
@@ -14,6 +14,6 @@ part1 l = fst $ foldl f (0, head l) l where
 part2 :: Integral n => [n] -> n
 part2 = part1 . map sum . windows 3
 
-day1 :: String -> (String, String)
-day1 str = (show $ part1 input, show $ part2 input)
+day01 :: String -> (String, String)
+day01 str = (show $ part1 input, show $ part2 input)
     where input = parse str

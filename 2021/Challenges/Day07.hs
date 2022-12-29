@@ -1,4 +1,4 @@
-module Challenges.Day7 where
+module Challenges.Day07 where
 import Utils (splitOn)
 import Data.List (sort, minimumBy)
 
@@ -31,5 +31,5 @@ part2 inp =  minimum [cost dist' i inp | i <- [min..max]]
           min = minimum inp
           max = maximum inp
 
-day7 :: String -> (String, String)
-day7 str = (show $ part1 inp, show $ part2 inp) where inp = parse str
+day07 :: String -> (String, String)
+day07 str = (show $ part1 inp, show $ part2 inp) where inp = parse str

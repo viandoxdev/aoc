@@ -1,4 +1,4 @@
-module Challenges.Day2 where
+module Challenges.Day02 where
 
 instance (Num a, Num b) => Num (a, b) where
     (+) (a, b) (c, d) = (a + c, b + d)
@@ -32,6 +32,6 @@ part2 = mul . snd . foldl f (0, (0, 0)) where
     f (aim, pos) (Down s) = (aim + s, pos)
     f (aim, (x, y)) (Fwd s) = (aim, (x + s, y + aim * s))
 
-day2 :: String -> (String, String)
-day2 str = (show $ part1 input, show $ part2 input)
+day02 :: String -> (String, String)
+day02 str = (show $ part1 input, show $ part2 input)
     where input = parse str

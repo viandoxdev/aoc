@@ -1,4 +1,4 @@
-module Challenges.Day6 where
+module Challenges.Day06 where
 import Utils (splitOn)
 import Data.List (sort, group, sortBy)
 import Data.Array (Array, accumArray, assocs)
@@ -34,5 +34,5 @@ part1 = count . run 80
 part2 :: [(Int, Int)] -> Int
 part2 = count . run 256
 
-day6 :: String -> (String, String)
-day6 str = (show $ part1 inp, show $ part2 inp) where inp = parse str
+day06 :: String -> (String, String)
+day06 str = (show $ part1 inp, show $ part2 inp) where inp = parse str
