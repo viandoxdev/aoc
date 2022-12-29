@@ -1,4 +1,4 @@
-module Challenges.Day5 where
+module Challenges.Day05 where
 import Utils (splitOn)
 import Data.Array (Array, array, elems, accumArray, assocs)
 import Data.Bits (Bits(shiftL))
@@ -44,5 +44,5 @@ part1 = solve . filter axisAligned
 part2 :: [(Vec2, Vec2)] -> Int
 part2 = solve
 
-day5 :: String -> (String, String)
-day5 str = (show $ part1 inp, show $ part2 inp) where inp = parse str
+day05 :: String -> (String, String)
+day05 str = (show $ part1 inp, show $ part2 inp) where inp = parse str

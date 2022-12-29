@@ -1,4 +1,4 @@
-module Challenges.Day8 where
+module Challenges.Day08 where
 import Utils (splitOn)
 import Data.Array
 import Data.List ((\\), intersect, intersperse, intercalate, findIndex, sort)
@@ -107,5 +107,5 @@ part2 :: [([Digit], [Digit])] -> Int
 part2 = sum . map f where
     f (i, o) = getValue (getMapping i) o
 
-day8 :: String -> (String, String)
-day8 str = (show $ part1 inp, show $ part2 inp) where inp = parse str
+day08 :: String -> (String, String)
+day08 str = (show $ part1 inp, show $ part2 inp) where inp = parse str

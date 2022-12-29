@@ -1,15 +1,15 @@
 module Main where
 
 import Aoc
-import Challenges.Day1
-import Challenges.Day2
-import Challenges.Day3
-import Challenges.Day4
-import Challenges.Day5
-import Challenges.Day6
-import Challenges.Day7
-import Challenges.Day8
-import Challenges.Day9
+import Challenges.Day01
+import Challenges.Day02
+import Challenges.Day03
+import Challenges.Day04
+import Challenges.Day05
+import Challenges.Day06
+import Challenges.Day07
+import Challenges.Day08
+import Challenges.Day09
 import Challenges.Day10
 
 runDay :: (Show n, Integral n) => Aoc -> n -> (String -> (String, String)) -> IO ()
@@ -31,15 +31,15 @@ dayDummy :: String -> (String, String)
 dayDummy _ = ("none", "none")
 
 days = 
-    [ ( 1,  day1)
-    , ( 2,  day2) 
-    , ( 3,  day3) 
-    , ( 4,  day4) 
-    , ( 5,  day5) 
-    , ( 6,  day6) 
-    , ( 7,  day7) 
-    , ( 8,  day8) 
-    , ( 9,  day9) 
+    [ ( 1, day01)
+    , ( 2, day02) 
+    , ( 3, day03) 
+    , ( 4, day04) 
+    , ( 5, day05) 
+    , ( 6, day06) 
+    , ( 7, day07) 
+    , ( 8, day08) 
+    , ( 9, day09) 
     , (10, day10) 
     ]
 

@@ -1,4 +1,4 @@
-module Challenges.Day4 where
+module Challenges.Day04 where
 
 import Utils
 import Data.List
@@ -29,5 +29,5 @@ run boards draw todraw = map (boardScore m s) w ++ run l (head todraw : draw) (t
 solve :: ([Int] -> Int) -> ([Int], [[[Int]]]) -> Int
 solve f (draws, boards) = f $ run boards [head draws] (tail draws)
 
-day4 :: String -> (String, String)
-day4 str = (show $ solve head inp, show $ solve last inp) where inp = parse str
+day04 :: String -> (String, String)
+day04 str = (show $ solve head inp, show $ solve last inp) where inp = parse str

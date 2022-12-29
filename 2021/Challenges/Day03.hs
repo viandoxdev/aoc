@@ -1,4 +1,4 @@
-module Challenges.Day3 where
+module Challenges.Day03 where
 import Data.List (transpose)
 
 bitBool :: Char -> Bool
@@ -30,5 +30,5 @@ part2' s i l = part2' s (i + 1) $ filter ((== bit) . (!!i)) l where bit = select
 part2 :: [[Bool]] -> Int
 part2 inp = part2' (uncurry (<)) 0 inp * part2' (uncurry (>=)) 0 inp
 
-day3 :: String -> (String, String)
-day3 str = (show $ part1 input, show $ part2 input) where input = parse str
+day03 :: String -> (String, String)
+day03 str = (show $ part1 input, show $ part2 input) where input = parse str
