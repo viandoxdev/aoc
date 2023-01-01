@@ -1,5 +1,5 @@
 module Challenges.Day07 where
-import Utils (splitOn)
+import Utils (splitOn, median)
 import Data.List (sort, minimumBy)
 
 parse :: String -> [Int]
@@ -8,9 +8,6 @@ parse = map read . splitOn ","
 avg :: [Int] -> Int
 avg = uncurry div . foldl f (0, 0) where
     f (t, l) i = (t + i, l + 1)
-
-median :: [Int] -> Int
-median list = sort list !! i where i = length list `div` 2
 
 dist :: Int -> Int -> Int
 dist f t = abs (f - t)
