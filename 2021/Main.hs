@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 module Main where
 
 import Aoc
@@ -11,36 +12,48 @@ import Challenges.Day07
 import Challenges.Day08
 import Challenges.Day09
 import Challenges.Day10
+import Challenges.Day11
+import System.Clock
+import Control.Monad (foldM)
 
-runDay :: (Show n, Integral n) => Aoc -> n -> (String -> (String, String)) -> IO ()
+runDay :: Aoc -> Int -> (String -> (String, String)) -> IO (Int, TimeSpec)
 runDay aoc day f = do
     putStrLn $ "[Day " ++ show day ++ "]"
     input <- getInput aoc 2021 day
-    let (part1, part2) = f input
+
+    start <- getTime Monotonic
+    let !(!part1, !part2) = f input
+    end <- getTime Monotonic
+
     putStrLn $ "  Part1: " ++ part1
     putStrLn $ "  Part2: " ++ part2
+    return (day, diffTimeSpec end start)
 
-runDays :: (Show n, Integral n) => Aoc -> [(n, String -> (String, String))] -> IO ()
-runDays aoc [] = return ()
-runDays aoc days = do
-    let (day, f) = head days
-    runDay aoc day f
-    runDays aoc (tail days)
+runDays :: Aoc -> [(Int, String -> (String, String))] -> IO [(Int, TimeSpec)]
+runDays aoc [] = return []
+runDays aoc days = mapM (uncurry (runDay aoc)) days
+
+showTs :: TimeSpec -> String
+showTs = (++ "ms") . show . (/100) . fromIntegral . (`div` 10000) . toNanoSecs
+
+printTime :: (Int, TimeSpec) -> IO ()
+printTime (day, ts) = putStrLn $ "  Day " ++ show day ++ ": " ++ showTs ts
 
 dayDummy :: String -> (String, String)
 dayDummy _ = ("none", "none")
 
-days = 
-    [ ( 1, day01)
-    , ( 2, day02) 
-    , ( 3, day03) 
-    , ( 4, day04) 
-    , ( 5, day05) 
-    , ( 6, day06) 
-    , ( 7, day07) 
-    , ( 8, day08) 
-    , ( 9, day09) 
-    , (10, day10) 
+days =
+    [ (01, day01)
+    , (02, day02)
+    , (03, day03)
+    , (04, day04)
+    , (05, day05)
+    , (06, day06)
+    , (07, day07)
+    , (08, day08)
+    , (09, day09)
+    , (10, day10)
+    , (11, day11)
     ]
 
 main :: IO ()
@@ -49,7 +62,21 @@ main = do
     putStrLn "Aoc 2021"
     putStrLn ""
 
-    runDays aoc days
+    start <- getTime Monotonic
+    results <- runDays aoc days
+    end <- getTime Monotonic
+
+    putStrLn ""
+    putStrLn "Timings"
+
+    mapM_ printTime results
+
+    let total = foldl (\a e -> a + snd e) 0 results
+    let totalMeasured = diffTimeSpec end start
+
+    putStrLn ""
+    putStrLn $ "Sum: " ++ showTs total
+    putStrLn $ "Total: " ++ showTs totalMeasured
 
     putStrLn ""
     putStrLn "Done"

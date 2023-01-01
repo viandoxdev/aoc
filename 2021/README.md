@@ -15,12 +15,13 @@ Build dependencies
 
 The rest are just haskage packages.
 
-"Framework" dependencies, used to programatically get the inputs:
+"Framework" dependencies, used to programatically get the inputs, and measure runtime:
 
-- utf8-string (used to decode inputs)
-- http-client (used to get inputs)
+- utf8-string
+- http-client
 - http-client-tls
 - http-types
+- clock
 
 Challenges dependencies (I tried to use as little as possible)
 
