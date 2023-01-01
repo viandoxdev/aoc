@@ -1,6 +1,6 @@
 module Utils where
 import Control.Applicative (ZipList(getZipList, ZipList))
-import Data.List (tails, unfoldr, sort)
+import Data.List (tails, unfoldr, sort, group)
 
 splitOn :: Eq a => [a] -> [a] -> [[a]]
 splitOn _ [] = []
@@ -27,3 +27,6 @@ leftToMaybe = either Just (const Nothing)
 
 median :: Ord a => [a] -> a
 median list = sort list !! i where i = length list `div` 2
+
+unique :: Ord a => [a] -> [a]
+unique = map head . group . sort
