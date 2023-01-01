@@ -1,4 +1,4 @@
-module Challenges.Day03 where
+module Challenges.Day03 (day03) where
 import Data.List (transpose)
 
 bitBool :: Char -> Bool

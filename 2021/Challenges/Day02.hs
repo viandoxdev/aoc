@@ -1,15 +1,17 @@
-module Challenges.Day02 where
+module Challenges.Day02 (day02) where
 
-instance (Num a, Num b) => Num (a, b) where
-    (+) (a, b) (c, d) = (a + c, b + d)
-    (-) (a, b) (c, d) = (a - c, b - d)
-    (*) (a, b) (c, d) = (a * c, b * d)
-    abs (a, b) = (abs a, abs b)
-    signum (a, b) = (signum a, signum b)
-    fromInteger i = (fromInteger i, fromInteger i)
+newtype Vec2 = Vec2 (Int, Int)
 
-mul :: (Int, Int) -> Int
-mul (x, y) = x * y
+instance Num Vec2 where
+    (+) (Vec2 (a, b)) (Vec2 (c, d)) = Vec2 (a + c, b + d)
+    (-) (Vec2 (a, b)) (Vec2 (c, d)) = Vec2 (a - c, b - d)
+    (*) (Vec2 (a, b)) (Vec2 (c, d)) = Vec2 (a * c, b * d)
+    abs (Vec2 (a, b)) = Vec2 (abs a, abs b)
+    signum (Vec2 (a, b)) = Vec2 (signum a, signum b)
+    fromInteger i = Vec2 (fromInteger i, fromInteger i)
+
+mul :: Vec2 -> Int
+mul (Vec2 (x, y)) = x * y
 
 data Com = Up Int | Down Int | Fwd Int
 
@@ -22,15 +24,15 @@ parse = map (f . words) . lines where
 
 part1 :: [Com] -> Int
 part1 = mul . sum . map offset where
-    offset (Up s) = (0, -s)
-    offset (Down s) = (0, s)
-    offset (Fwd s) = (s, 0)
+    offset (Up s) = Vec2 (0, -s)
+    offset (Down s) = Vec2 (0, s)
+    offset (Fwd s) = Vec2 (s, 0)
 
 part2 :: [Com] -> Int
-part2 = mul . snd . foldl f (0, (0, 0)) where
+part2 = mul . snd . foldl f (0, Vec2 (0, 0)) where
     f (aim, pos) (Up s) = (aim - s, pos)
     f (aim, pos) (Down s) = (aim + s, pos)
-    f (aim, (x, y)) (Fwd s) = (aim, (x + s, y + aim * s))
+    f (aim, Vec2 (x, y)) (Fwd s) = (aim, Vec2 (x + s, y + aim * s))
 
 day02 :: String -> (String, String)
 day02 str = (show $ part1 input, show $ part2 input)

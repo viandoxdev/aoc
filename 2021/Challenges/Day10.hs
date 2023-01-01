@@ -1,4 +1,4 @@
-module Challenges.Day10 where
+module Challenges.Day10 (day10) where
 import Control.Monad (foldM)
 import Utils (leftToMaybe, median)
 import Control.Error (mapMaybe, isLeft)

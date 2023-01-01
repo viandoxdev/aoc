@@ -3,7 +3,6 @@ module Main where
 
 import Aoc
 import System.Clock
-import Control.Monad (foldM)
 
 import Challenges.Day01
 import Challenges.Day02
@@ -33,11 +32,11 @@ runDay aoc day f = do
     return (day, diffTimeSpec end start)
 
 runDays :: Aoc -> [(Int, String -> (String, String))] -> IO [(Int, TimeSpec)]
-runDays aoc [] = return []
-runDays aoc days = mapM (uncurry (runDay aoc)) days
+runDays _ [] = return []
+runDays aoc ds = mapM (uncurry (runDay aoc)) ds
 
 showTs :: TimeSpec -> String
-showTs = (++ "ms") . show . (/100) . fromIntegral . (`div` 10000) . toNanoSecs
+showTs = (++ "ms") . show . (/100) . (fromIntegral . (`div` 10000) . toNanoSecs :: TimeSpec -> Double)
 
 printTime :: (Int, TimeSpec) -> IO ()
 printTime (day, ts) = putStrLn $ "  Day " ++ show day ++ ": " ++ showTs ts
@@ -45,6 +44,7 @@ printTime (day, ts) = putStrLn $ "  Day " ++ show day ++ ": " ++ showTs ts
 dayDummy :: String -> (String, String)
 dayDummy _ = ("none", "none")
 
+days :: [(Int, String -> (String, String))]
 days =
     [ (01, day01)
     , (02, day02)

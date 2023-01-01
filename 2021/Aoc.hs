@@ -9,16 +9,14 @@ module Aoc(
 
 import Network.HTTP.Client
 import Network.HTTP.Client.TLS   (tlsManagerSettings)
-import Network.HTTP.Types.Status (statusCode)
-import qualified Data.ByteString.Lazy.Char8 as L8
 import qualified Data.ByteString.Lazy.UTF8 as BLU
 import qualified Data.ByteString.UTF8 as BSU
 import Data.Functor
 import Control.Exception
-import Text.Read
 import System.IO.Error (isDoesNotExistError)
 import Control.Monad
 
+baseUrl :: String
 baseUrl = "https://adventofcode.com/"
 
 getSession :: IO String

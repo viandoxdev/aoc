@@ -1,9 +1,5 @@
-module Challenges.Day05 where
+module Challenges.Day05 (day05) where
 import Utils (splitOn)
-import Data.Array (Array, array, elems, accumArray, assocs)
-import Data.Bits (Bits(shiftL))
-import Data.Maybe (catMaybes)
-import Control.Monad ((<=<))
 import Data.List (group, sort)
 
 type Vec2 = (Int, Int)

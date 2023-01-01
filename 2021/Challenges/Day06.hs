@@ -1,7 +1,6 @@
-module Challenges.Day06 where
+module Challenges.Day06 (day06) where
 import Utils (splitOn)
-import Data.List (sort, group, sortBy)
-import Data.Array (Array, accumArray, assocs)
+import Data.Array (accumArray, assocs)
 
 flatten :: [(Int, Int)] -> [(Int, Int)]
 flatten = assocs . accumArray (+) 0 (0, 8)
