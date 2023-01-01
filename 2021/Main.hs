@@ -2,6 +2,9 @@
 module Main where
 
 import Aoc
+import System.Clock
+import Control.Monad (foldM)
+
 import Challenges.Day01
 import Challenges.Day02
 import Challenges.Day03
@@ -13,8 +16,8 @@ import Challenges.Day08
 import Challenges.Day09
 import Challenges.Day10
 import Challenges.Day11
-import System.Clock
-import Control.Monad (foldM)
+import Challenges.Day12
+import Challenges.Day13
 
 runDay :: Aoc -> Int -> (String -> (String, String)) -> IO (Int, TimeSpec)
 runDay aoc day f = do
@@ -54,6 +57,8 @@ days =
     , (09, day09)
     , (10, day10)
     , (11, day11)
+    , (12, day12)
+    , (13, day13)
     ]
 
 main :: IO ()
