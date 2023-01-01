@@ -1,19 +1,15 @@
-module Challenges.Day09 where
+module Challenges.Day09 (day09) where
 import Data.Char (digitToInt)
-import Utils (windows, transpose', chunks)
-import Debug.Trace
 import Data.List
 import Data.Array
-import Data.Array.ST (STArray, newArray, writeArray, readArray, runSTArray)
+import Data.Array.ST (STArray, newArray, writeArray, readArray)
 import Control.Monad.ST
-import Data.Maybe (fromMaybe)
-import GHC.Arr (unsafeFreezeSTArray)
 
 parse :: String -> [[Int]]
 parse = map (map digitToInt) . lines
 
-grid :: [[Int]] -> Array (Int, Int) Int
-grid a = listArray ((0, 0), (width, height)) $ concat $ transpose a
+makeGrid :: [[Int]] -> Array (Int, Int) Int
+makeGrid a = listArray ((0, 0), (width, height)) $ concat $ transpose a
     where height = length a - 1
           width = length (head a) - 1
 
@@ -22,8 +18,8 @@ grid a = listArray ((0, 0), (width, height)) $ concat $ transpose a
 
 lowPoints :: Array (Int, Int) Int -> [(Int, Int)]
 lowPoints grid = filter lp $ indices grid where
-    (>>) i h = maybe True (>h) (grid!?i)
-    lp (x, y) = all (>>h) [(x,y-1),(x-1,y),(x,y+1),(x+1,y)] where h = grid!(x,y)
+    lp (x, y) = all (maybe True (>h) . (grid!?)) [(x,y-1),(x-1,y),(x,y+1),(x+1,y)] 
+        where h = grid!(x,y)
 
 pointScore :: Array (Int, Int) Int -> (Int, Int) -> Int
 pointScore grid = (+1) . (grid!)
@@ -38,12 +34,12 @@ floodST visited grid (x, y) = if maybe True (>=9) $ grid!?(x,y) then return 0 el
 
 flood :: Array (Int, Int) Int -> (Int, Int) -> Int
 flood grid point = runST $ do
-    array <- newArray (bounds grid) False
-    floodST array grid point
+    arr <- newArray (bounds grid) False
+    floodST arr grid point
 
 day09 :: String -> (String, String)
-day09 str = ( show $ sum $ map (pointScore g) lps
-           , show $ product $ take 3 $ sortBy (flip compare) $ map (flood g) lps )
-    where g = grid $ parse str
-          lps = lowPoints g
+day09 str = ( show $ sum $ map (pointScore grid) lps
+           , show $ product $ take 3 $ sortBy (flip compare) $ map (flood grid) lps )
+    where grid = makeGrid $ parse str
+          lps = lowPoints grid
 

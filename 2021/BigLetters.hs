@@ -1,6 +1,5 @@
 module BigLetters (readString) where
 
-import Language.Haskell.TH.Syntax (lift)
 import Data.Word (Word32)
 import Data.List (transpose, foldl', elemIndex)
 import Utils (splitOn)
@@ -34,7 +33,7 @@ parseString :: Char -> String -> [Letter]
 parseString t = map (bitsToLetter . concat . pad . map (map (==t))) . splitOn ["      "] . transpose . lines
 
 bitsToLetter :: [Bool] -> Letter
-bitsToLetter = fromIntegral . foldl' (\a e -> a * 2 + (if e then 1 else 0)) 0
+bitsToLetter = fromIntegral . (foldl' (\a e -> a * 2 + (if e then 1 else 0)) 0 :: [Bool] -> Int)
 
 pad :: [[Bool]] -> [[Bool]]
 pad l | len <= 5 = l ++ replicate (5 - len) (replicate 6 False)

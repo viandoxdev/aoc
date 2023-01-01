@@ -1,10 +1,8 @@
-module Challenges.Day04 where
+module Challenges.Day04 (day04) where
 
 import Utils
 import Data.List
 import Data.Array (Array, accumArray, (!))
-import Data.Functor
-import Data.Maybe (mapMaybe)
 
 parse :: String -> ([Int], [[[Int]]])
 parse s = ( map read $ splitOn "," $ head blocks

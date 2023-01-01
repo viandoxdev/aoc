@@ -1,8 +1,7 @@
-module Challenges.Day13 where
+module Challenges.Day13 (day13) where
 import Utils
-import Debug.Trace
 import Data.Array (accumArray, elems)
-import Data.List (intercalate, transpose)
+import Data.List (transpose)
 import BigLetters
 
 data Fold = Vert Int | Horz Int deriving(Show)
@@ -28,9 +27,6 @@ showg :: [Vec2] -> String
 showg l = unlines (transpose $ chunks (height box) $ elems arr)
     where box = bbox l
           arr = accumArray (const id) ' ' box $ map (\(x, y) -> ((x, y), '#')) l
-
-traceShowIdg :: [Vec2] -> [Vec2]
-traceShowIdg l = trace (showg l) l
 
 part1 :: ([Vec2], [Fold]) -> Int
 part1 (l, fs) = length $ unique $ fold (head fs) l

@@ -1,9 +1,10 @@
 {-# LANGUAGE TupleSections #-}
-module Challenges.Day11 where
+module Challenges.Day11 (day11) where
 import Data.Array
 import Data.Char (digitToInt)
-import Data.List (transpose, intercalate, group, sort, mapAccumL)
+import Data.List (transpose, group, sort)
 
+dim :: Int
 dim = 10
 
 parse :: String -> Array (Int, Int) Int
@@ -14,9 +15,9 @@ inc a [] = a
 inc a xs = inc nextGrid nextInc
     where neighbours (x, y) = [(x-1,y-1),(x,y-1),(x+1,y-1),(x-1,y),(x+1,y),(x-1,y+1),(x,y+1),(x+1,y+1)]
           incremented = accum (+) a (map (,1) xs)
-          flash = filter ((\x -> x > 9 && x < 100) . (incremented!)) (map head $ group $ sort xs)
-          nextGrid = incremented // map (,100) flash
-          nextInc = filter (inRange (bounds a)) $ (>>= neighbours) flash
+          toFlash = filter ((\x -> x > 9 && x < 100) . (incremented!)) (map head $ group $ sort xs)
+          nextGrid = incremented // map (,100) toFlash
+          nextInc = filter (inRange (bounds a)) $ (>>= neighbours) toFlash
 
 flash :: Array (Int, Int) Int -> (Array (Int, Int) Int, Int)
 flash a = (a // updt, length updt)

@@ -1,9 +1,7 @@
-module Challenges.Day08 where
+module Challenges.Day08 (day08) where
 import Utils (splitOn)
 import Data.Array
-import Data.List ((\\), intersect, intersperse, intercalate, findIndex, sort)
-import Data.Maybe (catMaybes)
-import Data.Coerce (coerce)
+import Data.List ((\\), intersect, sort)
 
 -- | A segment 
 type Segment = Char
@@ -34,8 +32,10 @@ updateState state digit rdigit = filter validateState [accumArray (++) [] (0,6) 
 validateState :: State -> Bool
 validateState state = not $ any (null . (state!)) [0..6]
 
+defaultState :: State
 defaultState = array (0,6) [(i, ['a'..'g']) | i <- [0..6]]
 
+realDigits :: Array Int RealDigit
 realDigits = listArray (0,9) [ 
            [0,1,2,4,5,6]
          , [2,5]
