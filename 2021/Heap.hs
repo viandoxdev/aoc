@@ -1,109 +1,106 @@
 {-# LANGUAGE NamedFieldPuns #-}
-module Heap (heapNew, heapPush, heapPop, STHeap, heapSize, heapFind, heapAny, heapUpdateAt, heapUpdate, heapList) where
-import Data.Array.ST (STArray, newArray_, writeArray, readArray)
-import Control.Monad.ST ( ST )
-import Data.STRef (STRef, newSTRef, writeSTRef, readSTRef)
-import Data.Array (bounds)
-import Control.Monad (when, unless, forM_)
+
+module Heap (heapNew, heapPush, heapPop, STHeap, heapSize, heapList, heapAny, heapFind, heapUpdate, heapUpdateAt) where
+
+import Control.Monad (when)
+import Control.Monad.ST (ST)
+import Data.Array.ST (STArray, newArray_, readArray, writeArray)
 import Data.List (elemIndex)
 import Data.Maybe (fromJust)
+import Data.STRef (STRef, newSTRef, readSTRef, writeSTRef)
 
 data STHeap s v = STHeapCons
-    { nodes :: STArray s Int v
+    { nodes :: STArray s Int (Int, v)
     , size :: STRef s Int
     , cap :: Int
-    , cmp :: v -> v -> Bool }
+    }
 
-heapNew :: Int -> (v -> v -> Bool) -> Control.Monad.ST.ST s (STHeap s v)
-heapNew cap cmp = do
+heapNew :: Int -> ST s (STHeap s v)
+heapNew cap = do
     nodes <- newArray_ (0, cap - 1)
     size <- newSTRef 0
-    return STHeapCons {nodes, size, cmp, cap}
+    return STHeapCons{nodes, size, cap}
 
 heapSize :: STHeap s v -> ST s Int
 heapSize = readSTRef . size
 
-heapPush :: STHeap s v -> v -> ST s ()
-heapPush h v = do
+heapPush :: STHeap s v -> Int -> v -> ST s ()
+heapPush h p v = do
     sz <- readSTRef (size h)
 
-    if sz > cap h then
-        error "Heap capacity overflow"
-    else do
-        writeSTRef (size h) (sz + 1)
-        writeArray (nodes h) sz v
-        bubbleUp h sz
+    writeSTRef (size h) (sz + 1)
+    writeArray (nodes h) sz (p, v)
+    bubbleUp h sz
 
-heapAny :: STHeap s v -> (v -> Bool) -> v -> ST s Bool
-heapAny h e v = do
+heapAny :: STHeap s v -> ((Int, v) -> Bool) -> ST s Bool
+heapAny h e = do
     sz <- heapSize h
-    or <$> mapM (fmap e . readArray (nodes h)) [0..sz - 1]
+    or <$> mapM (fmap e . readArray (nodes h)) [0 .. sz - 1]
 
-heapFind :: STHeap s v -> (v -> Bool) -> ST s (Maybe Int)
+heapFind :: STHeap s v -> ((Int, v) -> Bool) -> ST s (Maybe Int)
 heapFind h e = do
     sz <- heapSize h
-    elemIndex True <$> mapM (fmap e . readArray (nodes h)) [0..sz - 1]
+    elemIndex True <$> mapM (fmap e . readArray (nodes h)) [0 .. sz - 1]
 
-heapUpdate :: Show v => STHeap s v -> (v -> Bool) -> v -> ST s ()
-heapUpdate h e v = do
+heapUpdate :: STHeap s v -> ((Int, v) -> Bool) -> Int -> v -> ST s ()
+heapUpdate h e p v = do
     i <- heapFind h e
-    heapUpdateAt h (fromJust i) v
+    heapUpdateAt h (fromJust i) p v
 
-heapUpdateAt :: Show v => STHeap s v -> Int -> v -> ST s ()
-heapUpdateAt h i v = do
+heapUpdateAt :: STHeap s v -> Int -> Int -> v -> ST s ()
+heapUpdateAt h i p v = do
     sz <- heapSize h
 
-    if i < 0 || i >= sz then
-        error "Can't update invalid index"
-    else do
-        p <- readArray (nodes h) i
-        writeArray (nodes h) i v
-
-        if cmp h p v then
-            heapify h i
+    if i < 0 || i >= sz
+        then error "Can't update invalid index"
         else do
-            bubbleUp h i
+            o <- fst <$> readArray (nodes h) i
+            writeArray (nodes h) i (p, v)
 
-heapList :: STHeap s v -> ST s [v] 
+            if o <= p
+                then heapify h i
+                else do
+                    bubbleUp h i
+
+heapList :: STHeap s v -> ST s [Int]
 heapList h = do
     sz <- heapSize h
-    mapM (readArray (nodes h)) [0..sz - 1]
+    mapM (fmap fst . readArray (nodes h)) [0 .. sz - 1]
 
 heapPop :: STHeap s v -> ST s v
 heapPop h = do
     let n = nodes h
-    sz <- subtract 1 <$> readSTRef (size h)
+    sz <- subtract 1 <$> heapSize h
 
-    if sz < 0 then
-        error "Can't pop from empty queue"
-    else do
-        root <- readArray n 0
-        leaf <- readArray n sz
-        writeArray n 0 leaf
-        writeSTRef (size h) sz
-        heapify h 0
-        return root
+    if sz < 0
+        then error "Can't pop from empty queue"
+        else do
+            root <- readArray n 0
+            leaf <- readArray n sz
+            writeArray n 0 leaf
+            writeSTRef (size h) sz
+            heapify h 0
+            return $ snd root
+
+safeGet :: STArray s Int (Int, v) -> Int -> Int -> ST s Int
+safeGet n sz i = if i < sz then fst <$> readArray n i else return maxBound
 
 heapify :: STHeap s v -> Int -> ST s ()
 heapify h i = do
-    let f = cmp h
     let n = nodes h
     let (l, r) = (2 * i + 1, 2 * i + 2)
 
-    sz <- readSTRef $ size h
-    m <- newSTRef i
+    sz <- heapSize h
 
-    when (l < sz) $ do
-        c <- readSTRef m
-        lc <- readArray n l
-        mc <- readArray n c
-        when (f lc mc) $ writeSTRef m l
-    when (r < sz) $ do
-        c <- readSTRef m
-        rc <- readArray n r
-        mc <- readArray n c
-        when (f rc mc) $ writeSTRef m r
-    c <- readSTRef m
+    lc <- safeGet n sz l
+    rc <- safeGet n sz r
+    mc <- fst <$> readArray n i
+
+    let c
+            | lc < mc && lc <= rc = l
+            | rc < mc && rc <= lc = r
+            | otherwise = i
+
     when (c /= i) $ do
         a <- readArray n i
         b <- readArray n c
@@ -113,12 +110,12 @@ heapify h i = do
 
 bubbleUp :: STHeap s v -> Int -> ST s ()
 bubbleUp h i = do
-    let pi = (i - 1) `div` 2
+    let j = (i - 1) `div` 2
     let n = nodes h
-    when (pi >= 0) $ do
-        c <- readArray n i
-        p <- readArray n pi
-        when (cmp h c p) $ do
-            writeArray n i p
-            writeArray n pi c
-            bubbleUp h pi
+    when (j >= 0) $ do
+        (c, cv) <- readArray n i
+        (p, pv) <- readArray n j
+        when (c < p) $ do
+            writeArray n i (p, pv)
+            writeArray n j (c, cv)
+            bubbleUp h j
