@@ -49,8 +49,8 @@ aStar' graph dist score open to queue = do
 
             aStar' graph dist score open to queue
 
-djikstra' :: Array Vec2 Int -> STArray s Vec2 Int -> STArray s Vec2 Bool -> Vec2 -> STHeap s Vec2 -> ST s Int
-djikstra' graph dist open to queue = do
+dijkstra' :: Array Vec2 Int -> STArray s Vec2 Int -> STArray s Vec2 Bool -> Vec2 -> STHeap s Vec2 -> ST s Int
+dijkstra' graph dist open to queue = do
     u <- heapPop queue
     writeArray open u False
 
@@ -72,7 +72,7 @@ djikstra' graph dist open to queue = do
                         heapPush queue alt v
                         writeArray open v True
 
-            djikstra' graph dist open to queue
+            dijkstra' graph dist open to queue
 
 aStar :: Array Vec2 Int -> Vec2 -> Vec2 -> Int
 aStar graph from to = runST $ do
@@ -86,14 +86,14 @@ aStar graph from to = runST $ do
     heapPush queue s from
     aStar' graph dist score open to queue
 
-djikstra :: Array Vec2 Int -> Vec2 -> Vec2 -> Int
-djikstra graph from to = runST $ do
+dijkstra :: Array Vec2 Int -> Vec2 -> Vec2 -> Int
+dijkstra graph from to = runST $ do
     dist <- newArray (bounds graph) maxBound
     open <- newArray (bounds graph) False
     queue <- heapNew 2048
     writeArray dist from 0
     heapPush queue 0 from
-    djikstra' graph dist open to queue
+    dijkstra' graph dist open to queue
 
 wrap :: Int -> Int
 wrap = (+ 1) . (`mod` 9) . subtract 1
@@ -107,7 +107,7 @@ upscale g = array ((0, 0), (-1, -1) `add` (bnd `mul` (5, 5))) $ concatMap f $ as
     mul (a, b) (c, d) = (a * c, b * d)
 
 solve :: Array Vec2 Int -> Int
-solve g = (uncurry $ djikstra g) (bounds g)
+solve g = (uncurry $ dijkstra g) (bounds g)
 
 solve' :: Array Vec2 Int -> Int
 solve' g = (uncurry $ aStar g) (bounds g)
