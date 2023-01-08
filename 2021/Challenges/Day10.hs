@@ -1,8 +1,8 @@
 module Challenges.Day10 (day10) where
 import Control.Monad (foldM)
 import Utils (leftToMaybe, median)
-import Control.Error (mapMaybe, isLeft)
-import Data.Either (fromRight)
+import Data.Either (fromRight, isLeft)
+import Data.Maybe (mapMaybe)
 
 data BracketKind = Round | Square | Curly | Angled deriving(Eq)
 data Bracket = Opening BracketKind | Closing BracketKind
