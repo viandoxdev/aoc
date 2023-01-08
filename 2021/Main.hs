@@ -19,9 +19,6 @@ import Challenges.Day12
 import Challenges.Day13
 import Challenges.Day14
 import Challenges.Day15
-import Heap
-import Control.Monad.ST
-import Debug.Trace (traceShow)
 
 runDay :: Aoc -> Int -> (String -> (String, String)) -> IO (Int, TimeSpec)
 runDay aoc day f = do
@@ -66,6 +63,7 @@ days =
     , (13, day13)
     , (14, day14)
     , (15, day15)
+    , (15, day15')
     ]
 
 main :: IO ()
