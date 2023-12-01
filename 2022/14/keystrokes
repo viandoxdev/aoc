@@ -1,4 +1,4 @@
-ggVGd:r !curl -s --cookie "session=$(cat ../session)" 'https://adventofcode.com/2022/day/14/input'
+ggVGd:r !curl -s --cookie "session=$(cat ../../session)" 'https://adventofcode.com/2022/day/14/input'
 ggddGo160A·mayy199p
 :let @i="gg^ve\"bdxve\"cdvedxve\"dywwve\"ey:let @x=' ''a\<c-r>blh\<c-r>cjk'\<CR>:let @y=' ''a\<c-r>dlh\<c-r>ejk'\<CR>@x\<c-v>@yr█:%s/^[0-9]\\+,[0-9]\\+\\n//e\<CR>"
 :let @s='420  '
