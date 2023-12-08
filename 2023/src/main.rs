@@ -4,12 +4,14 @@ use std::{
 };
 
 use anyhow::Result;
+use chrono::{FixedOffset, Utc, TimeZone, Datelike};
 use std::future::Future;
 use tracing_subscriber::prelude::*;
 
 use aoc::Aoc;
 use challenges::*;
 
+mod utils;
 mod aoc;
 mod challenges;
 
@@ -144,43 +146,53 @@ async fn main() -> Result<()> {
     let days: &[Box<dyn AnyDay>] = &[
         Day::new(01, day1),
         Day::new(02, day2),
-        // Day::new(03, day3),
-        // Day::new(04, day4),
-        // Day::new(05, day5),
-        // Day::new(06, day6),
-        // Day::new(07, day7),
-        // Day::new(08, day8),
-        // Day::new(09, day9),
-        // Day::new(10, day10),
-        // Day::new(11, day11),
-        // Day::new(12, day12),
-        // Day::new(13, day13),
-        // Day::new(14, day14),
-        // Day::new(15, day15),
-        // Day::new(16, day16),
-        // Day::new(17, day17),
-        // Day::new(18, day18),
-        // Day::new(19, day19),
-        // Day::new(20, day20),
-        // Day::new(21, day21),
-        // Day::new(22, day22),
-        // Day::new(23, day23),
-        // Day::new(24, day24),
-        // Day::new(25, day25),
+        Day::new(03, day3),
+        Day::new(04, day4),
+        Day::new(05, day5),
+        Day::new(06, day6),
+        Day::new(07, day7),
+        Day::new(08, day8),
+        Day::new(09, day9),
+        Day::new(10, day10),
+        Day::new(11, day11),
+        Day::new(12, day12),
+        Day::new(13, day13),
+        Day::new(14, day14),
+        Day::new(15, day15),
+        Day::new(16, day16),
+        Day::new(17, day17),
+        Day::new(18, day18),
+        Day::new(19, day19),
+        Day::new(20, day20),
+        Day::new(21, day21),
+        Day::new(22, day22),
+        Day::new(23, day23),
+        Day::new(24, day24),
+        Day::new(25, day25),
     ];
+    
+    let tz = FixedOffset::west_opt(5 * 3600).unwrap();
+    let time = Utc::now().with_timezone(&tz);
+    let start = tz.with_ymd_and_hms(2023, 12, 1, 0, 0, 0).unwrap();
+    let end = tz.with_ymd_and_hms(2023, 12, 25, 0, 0, 0).unwrap();
+    let released: usize = if time < start { 0 } else if time > end { 25 } else { time.day() as usize };
+
+    let days = &days[0..released];
 
     let session_file = std::fs::read_to_string("../session")?;
     let session = session_file.trim_end();
     let aoc = Aoc::new(session);
-    let start = Instant::now();
     let mut results = Vec::with_capacity(days.len());
-    let total_runtime = Instant::now() - start;
 
     println!("Aoc 2023\n");
+
+    let start = Instant::now();
 
     for day in days {
         results.push(day.run(&aoc).await);
     }
+
+    let total_runtime = Instant::now() - start;
 
     for res in &results {
         let day = res.day();
