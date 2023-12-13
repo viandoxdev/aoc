@@ -4,7 +4,7 @@ use anyhow::Result;
 use reqwest::Client;
 
 const YEAR: u32 = 2023;
-const BASE_URL: &'static str = "https://adventofcode.com";
+const BASE_URL: &str = "https://adventofcode.com";
 
 pub struct Aoc {
     session: String,

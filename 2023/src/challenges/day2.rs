@@ -39,7 +39,7 @@ impl FromStr for GameSet {
         let mut res = GameSet::EMPTY;
         for field in s.split(", ") {
             let num: u32 = field
-                .split_once(" ")
+                .split_once(' ')
                 .ok_or(anyhow!("Malformed game set"))?
                 .0 // Get the sub string before the space
                 .parse()?;
