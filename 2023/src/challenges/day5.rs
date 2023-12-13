@@ -104,7 +104,7 @@ impl Map {
     }
 
     // Get the source ranges for a single destination range (in order)
-    fn reverse<'a>(&'a self, dest: Range<u64>) -> impl Iterator<Item = Range<u64>> + 'a {
+    fn reverse(&self, dest: Range<u64>) -> impl Iterator<Item = Range<u64>> + '_ {
         // Workaround for Ranges not implementing Copy
         let mut dest_start = dest.start;
         let dest_end = dest.end;
@@ -244,13 +244,16 @@ pub async fn day5(input: String) -> Result<(String, String)> {
         .ok_or(anyhow!("No seeds"))?;
 
     // Solve part 2, pretty not straightforward
-    // We do this by solving a more gengeral problem (because I felt like it): We the seed for
+    // We do this by solving a more gengeral problem (because I felt like it): We get the seed for
     // every value of location. Obviously since there are ~4 billion values we don't process each
-    // individually, but we work with ranges. Conceptually we take a range, ask figure out what
+    // individually, but we work with ranges. Conceptually we take a range, and figure out what
     // sequence of ranges produce the same values in the same order as the original range when
     // mapped (this is the job of map.reverse), then we just do that for each map, obtaining a list
     // of ranges of seeds whose locations are 0 to MAX (the first seed of the first range has
     // location 0, and the last seed of the last range has location MAX)
+
+    // We actually want a vec with a single range, not a vec with the items of a range
+    #[allow(clippy::single_range_in_vec_init)]
     let ranges = maps.iter().rev().fold(vec![0..MAX], |rs, m| {
         rs.into_iter().flat_map(|r| m.reverse(r)).collect_vec()
     });

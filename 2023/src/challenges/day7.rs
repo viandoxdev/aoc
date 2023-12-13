@@ -57,7 +57,7 @@ impl Hand {
     fn parse(s: &str, joker: bool) -> Result<Self> {
         // Use the right map
         let map = if joker { &CARD_MAP_JOKER } else { &CARD_MAP };
-        let (hand_str, bid_str) = s.split_once(" ").ok_or(anyhow!("Malformed hand"))?;
+        let (hand_str, bid_str) = s.split_once(' ').ok_or(anyhow!("Malformed hand"))?;
         let bid: u32 = bid_str.parse()?;
         // Array of the counts of each card 
         let mut count = [0u8; 13];

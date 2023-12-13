@@ -21,11 +21,18 @@ impl FromStr for Direction {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq)]
 struct Node {
     is_start: bool,
+    is_end: bool,
     id: usize,
     edges: (usize, usize),
+}
+
+impl PartialEq for Node {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
 }
 
 impl Node {
@@ -34,6 +41,12 @@ impl Node {
             Direction::Left => self.edges.0,
             Direction::Right => self.edges.1,
         }
+    }
+    fn is_start(&self) -> bool {
+        self.is_start
+    }
+    fn is_end(&self) -> bool {
+        self.is_end
     }
 }
 
@@ -58,7 +71,8 @@ pub async fn day8(input: String) -> Result<(String, String)> {
         nodes_name.insert(from.to_string(), id);
         // Add node
         nodes.push(Node {
-            is_start: from.ends_with("A"),
+            is_end: from.ends_with('Z'),
+            is_start: from.ends_with('A'),
             id,
             edges: (0, 0), // dummy value
         })
@@ -80,23 +94,26 @@ pub async fn day8(input: String) -> Result<(String, String)> {
     }
 
     // Get ids of start and end nodes for part 1
-    let start = nodes_name["AAA"];
-    let end = nodes_name["ZZZ"];
+    let start = &nodes[nodes_name["AAA"]];
+    let end = &nodes[nodes_name["ZZZ"]];
 
-    let part1 = dirs
-        .iter()
-        .cycle()
-        .enumerate()
-        // ↑ Go over all the directions in a loop, keeping track of how many steps we've gone through
-        // ↓ Follow the directions until we reach the end and return the number of steps
-        .fold_while(start, |cur, (count, &dir)| {
-            if cur == end {
-                Done(count)
-            } else {
-                Continue(nodes[cur].get_next(dir))
-            }
-        })
-        .into_inner();
+    // We take box because generic closures don't exist (the indirection is pretty marginal and
+    // this may also just get optimized, maybe)
+    let steps_from_to = |from: &Node, is_end: Box<dyn Fn(&Node) -> bool>| {
+        dirs.iter()
+            .cycle()
+            .fold_while((from, 0u64), |(cur, count), &dir| {
+                if is_end(cur) {
+                    Done((cur, count))
+                } else {
+                    Continue((&nodes[cur.get_next(dir)], count + 1))
+                }
+            })
+            .into_inner()
+            .1
+    };
+
+    let part1 = steps_from_to(start, Box::new(|n| n == end));
 
     // Part 2 is *heavily* based on tricks: assumptions about the input generators allowing me to
     // take shortcuts that don't hold for the more general problem explained on day 8.
@@ -116,30 +133,8 @@ pub async fn day8(input: String) -> Result<(String, String)> {
     let part2 = nodes
         .iter()
         .copied()
-        .filter(|n| n.is_start)
-        .map(|s| {
-            // Compute the cycles' lengths
-            let mut visited = HashMap::new();
-            let mut cur = &s;
-            // We enumerate twice, so we get the position of the current direction (repeating), and
-            // the number of steps done in total.
-            let mut dirs = dirs.iter().enumerate().cycle().enumerate();
-            // using a loop so that rust understands that the only way out is the return within
-            loop {
-                let (count, (i, &dir)) = dirs.next().unwrap();
-                // Check if we got to an already visited node while on the same direction, meaning
-                // any following steps would be doing the exact same as we already did (a cycle)
-                if let Some(&start) = visited.get(&(i, cur.id)) {
-                    // The cycle doesn't start at 0 so we take that into account
-                    return count - start;
-                }
-
-                // Mark as visited and remember when we first saw it
-                visited.insert((i, cur.id), count);
-                // Go to the next one
-                cur = &nodes[cur.get_next(dir)]
-            }
-        })
+        .filter(Node::is_start)
+        .map(|s| steps_from_to(&s, Box::new(Node::is_end)))
         // Find lowest common multiple of the lengths of all the cycles
         .reduce(|a, b| a.lcm(&b))
         .unwrap_or_default();

@@ -9,7 +9,7 @@ struct Race {
 
 impl Race {
     fn parse(s: &str) -> Result<Vec<Self>> {
-        let (time_str, dist_str) = s.split_once("\n").ok_or(anyhow!("Malformed input"))?;
+        let (time_str, dist_str) = s.split_once('\n').ok_or(anyhow!("Malformed input"))?;
         time_str
             .split_whitespace()
             .zip(dist_str.split_whitespace())
@@ -24,7 +24,7 @@ impl Race {
     }
 
     fn parse_kerning(s: &str) -> Result<Self> {
-        let (time_str, dist_str) = s.split_once("\n").ok_or(anyhow!("Malformed input"))?;
+        let (time_str, dist_str) = s.split_once('\n').ok_or(anyhow!("Malformed input"))?;
         let duration = time_str
             .chars()
             .flat_map(|x| x.to_digit(10))

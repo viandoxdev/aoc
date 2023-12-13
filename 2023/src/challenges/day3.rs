@@ -43,7 +43,7 @@ pub async fn day3(input: String) -> Result<(String, String)> {
         let i = i as i32;
 
         // Check if symbol and set is_part
-        if c.is_digit(10) {
+        if c.is_ascii_digit() {
             let has_symbol = neighbours(i)
                 .flat_map(|i| input_chars.get(usize::try_from(i).ok()?).copied())
                 .any(|x| !matches!(x, '0'..='9' | '.' | '\n'));
@@ -86,7 +86,7 @@ pub async fn day3(input: String) -> Result<(String, String)> {
         // Get the spans each neighbour belongs to (if any), this can return duplicates if two
         // neighbours belong to the same span
         let dup_spans = neighbours(i as i32)
-            .flat_map(|i| usize::try_from(i))
+            .flat_map(usize::try_from)
             .flat_map(|i| part_number_spans.iter().find(|s| s.contains(&i)));
 
         // Remove duplicates
