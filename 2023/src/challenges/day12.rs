@@ -12,6 +12,14 @@ use parking_lot::RwLock;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use Spring::*;
 
+// TODO: Recover this file:
+//  - use FxHasher
+//  - Remove any debugging info
+//    - make Record a struct of only unnresolved
+//    - remove resolved
+//    - use u8 where possible
+//  - Remove recursion
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum Spring {
     // '#'
