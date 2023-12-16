@@ -179,8 +179,6 @@ async fn main() -> Result<()> {
 
     let days = &days[0..released];
 
-    let days = &days[11..=11];
-
     let session_file = std::fs::read_to_string("../session")?;
     let session = session_file.trim_end();
     let aoc = Aoc::new(session);
