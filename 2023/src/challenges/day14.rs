@@ -61,7 +61,7 @@ impl FromStr for State {
         let rocks = grid
             .iter()
             .enumerate()
-            .flat_map(|(y, r)| r.into_iter().enumerate().map(move |(x, &t)| (x, y, t)))
+            .flat_map(|(y, r)| r.iter().enumerate().map(move |(x, &t)| (x, y, t)))
             .filter_map(|(x, y, t)| (t == Tile::Rock).then_some((x, y)))
             .collect_vec();
 
@@ -95,17 +95,16 @@ impl State {
         let mut farthest = vec![0; self.width];
 
         for y in 0..self.height {
-            for x in 0..self.width {
+            for (x, far) in farthest.iter_mut().enumerate() {
                 match self.grid[y][x] {
                     Tile::Block => {
-                        farthest[x] = y + 1;
+                        *far = y + 1;
                     }
                     Tile::Rock => {
-                        let ny = farthest[x];
-                        farthest[x] += 1;
-                        self.rocks.push((x, ny));
+                        self.rocks.push((x, *far));
                         self.grid[y][x] = Tile::Empty;
-                        self.grid[ny][x] = Tile::Rock;
+                        self.grid[*far][x] = Tile::Rock;
+                        *far += 1;
                     }
                     Tile::Empty => {}
                 }
@@ -118,16 +117,15 @@ impl State {
         let mut farthest = [0; 100];
 
         for y in 0..self.height {
-            for x in 0..self.width {
+            for (x, far) in farthest.iter_mut().enumerate().take(self.width) {
                 match self.grid[y][x] {
                     Tile::Block => {
-                        farthest[x] = y + 1;
+                        *far = y + 1;
                     }
                     Tile::Rock => {
-                        let ny = farthest[x];
-                        farthest[x] += 1;
                         self.grid[y][x] = Tile::Empty;
-                        self.grid[ny][x] = Tile::Rock;
+                        self.grid[*far][x] = Tile::Rock;
+                        *far += 1;
                     }
                     Tile::Empty => {}
                 }
@@ -137,16 +135,15 @@ impl State {
         farthest.fill(0);
 
         for x in 0..self.width {
-            for y in 0..self.height {
+            for (y, far) in farthest.iter_mut().enumerate().take(self.height) {
                 match self.grid[y][x] {
                     Tile::Block => {
-                        farthest[y] = x + 1;
+                        *far = x + 1;
                     }
                     Tile::Rock => {
-                        let nx = farthest[y];
-                        farthest[y] += 1;
                         self.grid[y][x] = Tile::Empty;
-                        self.grid[y][nx] = Tile::Rock;
+                        self.grid[y][*far] = Tile::Rock;
+                        *far += 1;
                     }
                     Tile::Empty => {}
                 }
@@ -156,16 +153,15 @@ impl State {
         farthest.fill(self.height - 1);
 
         for y in (0..self.height).rev() {
-            for x in 0..self.width {
+            for (x, far) in farthest.iter_mut().enumerate().take(self.width) {
                 match self.grid[y][x] {
                     Tile::Block => {
-                        farthest[x] = y.saturating_sub(1);
+                        *far = y.saturating_sub(1);
                     }
                     Tile::Rock => {
-                        let ny = farthest[x];
-                        farthest[x] = farthest[x].saturating_sub(1);
                         self.grid[y][x] = Tile::Empty;
-                        self.grid[ny][x] = Tile::Rock;
+                        self.grid[*far][x] = Tile::Rock;
+                        *far = (*far).saturating_sub(1);
                     }
                     Tile::Empty => {}
                 }
@@ -175,17 +171,16 @@ impl State {
         farthest.fill(self.width - 1);
 
         for x in (0..self.width).rev() {
-            for y in 0..self.height {
+            for (y, far) in farthest.iter_mut().enumerate().take(self.height) {
                 match self.grid[y][x] {
                     Tile::Block => {
-                        farthest[y] = x.saturating_sub(1);
+                        *far = x.saturating_sub(1);
                     }
                     Tile::Rock => {
-                        let nx = farthest[y];
-                        farthest[y] = farthest[y].saturating_sub(1);
-                        self.rocks.push((nx, y));
+                        self.rocks.push((*far, y));
                         self.grid[y][x] = Tile::Empty;
-                        self.grid[y][nx] = Tile::Rock;
+                        self.grid[y][*far] = Tile::Rock;
+                        *far = (*far).saturating_sub(1);
                     }
                     Tile::Empty => {}
                 }

@@ -9,13 +9,12 @@ pub async fn day15(input: String) -> Result<(String, String)> {
     let input = input.lines().next().unwrap();
     let part1 = input.split(',').map(hash).sum::<u32>();
     let part2 = {
-        let mut boxes: Vec<Vec<(&str, u32)>> = std::iter::repeat_with(|| Vec::new())
+        let mut boxes: Vec<Vec<(&str, u32)>> = std::iter::repeat_with(Vec::new)
             .take(256)
             .collect_vec();
 
         for step in input.split(',') {
-            if step.ends_with('-') {
-                let label = &step[..(step.len() - 1)];
+            if let Some(label) = step.strip_suffix('-') {
                 boxes[hash(label) as usize].retain(|&(l, _)| l != label);
             } else {
                 let (label, focal) = step.split_once('=').context("Malformed input")?;
