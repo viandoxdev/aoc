@@ -1,0 +1,22 @@
+(lang dune 3.9)
+
+(name aoc2024)
+
+(generate_opam_files true)
+
+(source
+ (github viandoxdev/aoc))
+
+(authors "viandoxdev")
+
+(documentation https://url/to/documentation)
+
+(package
+ (name aoc2024)
+ (synopsis "AOC 2024 ocaml solutions")
+ (description "Advent of Code 2024")
+ (depends ocaml dune)
+ (tags
+  (topics "to describe" your project)))
+
+; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project

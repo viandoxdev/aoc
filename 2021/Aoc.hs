@@ -1,20 +1,20 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 
-module Aoc(
+module Aoc (
     Aoc,
     newAoc,
     getInput,
 ) where
 
-import Network.HTTP.Client
-import Network.HTTP.Client.TLS   (tlsManagerSettings)
+import Control.Exception
+import Control.Monad
 import qualified Data.ByteString.Lazy.UTF8 as BLU
 import qualified Data.ByteString.UTF8 as BSU
 import Data.Functor
-import Control.Exception
+import Network.HTTP.Client
+import Network.HTTP.Client.TLS (tlsManagerSettings)
 import System.IO.Error (isDoesNotExistError)
-import Control.Monad
 
 baseUrl :: String
 baseUrl = "https://adventofcode.com/"
@@ -23,7 +23,7 @@ getSession :: IO String
 getSession = readFile "../session" <&> filter (/= '\n')
 
 -- | Context object for Aoc related actions (fetching input, submitting answer...)
-data Aoc = AocCons { session :: String, manager :: Manager }
+data Aoc = AocCons {session :: String, manager :: Manager}
 
 -- | Fetch input online
 fetchInput :: (Show n, Integral n) => Aoc -> n -> n -> IO String
@@ -31,7 +31,7 @@ fetchInput aoc y d = do
     let url = concat [baseUrl, show y, "/day/", show d, "/input"]
     let cookie = "session=" ++ session aoc
     initreq <- parseRequest url
-    let req = initreq { requestHeaders = [("Cookie", BSU.fromString cookie)] }
+    let req = initreq{requestHeaders = [("Cookie", BSU.fromString cookie)]}
     res <- httpLbs req (manager aoc)
     return $ BLU.toString $ responseBody res
 
@@ -47,13 +47,14 @@ getInput :: (Show n, Integral n) => Aoc -> n -> n -> IO String
 getInput aoc y d = do
     result <- tryJust (guard . isDoesNotExistError) (readFile path)
     case result of
-        Left  _  -> fetchAndCache aoc y d path
-        Right x  -> return x
-    where path = "inputs/" ++ show y ++ "." ++ show d
+        Left _ -> fetchAndCache aoc y d path
+        Right x -> return x
+  where
+    path = "inputs/" ++ show y ++ "." ++ show d
 
 -- | Create a new Aoc context
 newAoc :: IO Aoc
 newAoc = do
     session <- getSession
     manager <- newManager tlsManagerSettings
-    return AocCons { session, manager }
+    return AocCons{session, manager}

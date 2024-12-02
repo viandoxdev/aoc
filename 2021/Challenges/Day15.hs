@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Challenges.Day15 (day15, day15') where
+module Challenges.Day15 (day15) where
 
 import Control.Monad (forM_, unless, when)
 import Control.Monad.ST (ST, runST)
@@ -19,40 +19,9 @@ parse str = listArray ((0, 0), (w, h)) $ concat $ transpose $ map (map digitToIn
     h = length ls - 1
     w = length (head ls) - 1
 
-heuristics :: Vec2 -> Vec2 -> Int
-heuristics (gx, gy) (x, y) = abs (x - gx) + abs (y - gy)
-
-aStar' :: Array Vec2 Int -> STArray s Vec2 Int -> STArray s Vec2 Int -> STArray s Vec2 Bool -> Vec2 -> STHeap s Vec2 -> ST s Int
-aStar' graph dist score open to queue = do
-    u <- heapPop queue
-    writeArray open u False
-
-    if u == to
-        then readArray dist u
-        else do
-            let (x, y) = u
-            let neighbours = filter (inRange (bounds graph)) [(x, y - 1), (x - 1, y), (x, y + 1), (x + 1, y)]
-
-            du <- readArray dist u
-            forM_ neighbours $ \v -> do
-                dv <- readArray dist v
-                let alt = du + graph ! v
-                let s = alt + heuristics to v
-
-                when (alt < dv) $ do
-                    writeArray dist v alt
-                    writeArray score v s
-                    o <- readArray open v
-                    unless o $ do
-                        heapPush queue s v
-                        writeArray open v True
-
-            aStar' graph dist score open to queue
-
 dijkstra' :: Array Vec2 Int -> STArray s Vec2 Int -> STArray s Vec2 Bool -> Vec2 -> STHeap s Vec2 -> ST s Int
 dijkstra' graph dist open to queue = do
     u <- heapPop queue
-    writeArray open u False
 
     if u == to
         then readArray dist u
@@ -73,18 +42,6 @@ dijkstra' graph dist open to queue = do
                         writeArray open v True
 
             dijkstra' graph dist open to queue
-
-aStar :: Array Vec2 Int -> Vec2 -> Vec2 -> Int
-aStar graph from to = runST $ do
-    dist <- newArray (bounds graph) maxBound
-    score <- newArray (bounds graph) maxBound
-    open <- newArray (bounds graph) False
-    queue <- heapNew 2048
-    writeArray dist from 0
-    let s = heuristics to from
-    writeArray score from s
-    heapPush queue s from
-    aStar' graph dist score open to queue
 
 dijkstra :: Array Vec2 Int -> Vec2 -> Vec2 -> Int
 dijkstra graph from to = runST $ do
@@ -109,11 +66,5 @@ upscale g = array ((0, 0), (-1, -1) `add` (bnd `mul` (5, 5))) $ concatMap f $ as
 solve :: Array Vec2 Int -> Int
 solve g = (uncurry $ dijkstra g) (bounds g)
 
-solve' :: Array Vec2 Int -> Int
-solve' g = (uncurry $ aStar g) (bounds g)
-
 day15 :: String -> (String, String)
 day15 str = (show $ solve inp, show $ solve $ upscale inp) where inp = parse str
-
-day15' :: String -> (String, String)
-day15' str = (show $ solve inp, show $ solve' $ upscale inp) where inp = parse str

@@ -166,18 +166,12 @@ async fn main() -> Result<()> {
         Day::new(20, day20),
         Day::new(21, day21),
         Day::new(22, day22),
-        Day::new(23, day23),
-        Day::new(24, day24),
-        Day::new(25, day25),
+        Day::new(23, day23), // TODO: fix
+        //Day::new(24, day24),
+        //Day::new(25, day25),
     ];
-    
-    let tz = FixedOffset::west_opt(5 * 3600).unwrap();
-    let time = Utc::now().with_timezone(&tz);
-    let start = tz.with_ymd_and_hms(2023, 12, 1, 0, 0, 0).unwrap();
-    let end = tz.with_ymd_and_hms(2023, 12, 25, 0, 0, 0).unwrap();
-    let released: usize = if time < start { 0 } else if time > end { 25 } else { time.day() as usize };
 
-    let days = &days[0..released];
+    let days = &days[20..21]; // TODO: Remove that
 
     let session_file = std::fs::read_to_string("../session")?;
     let session = session_file.trim_end();

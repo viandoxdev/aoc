@@ -1,9 +1,9 @@
 CC=ghc
 FLAGS=-funfolding-use-threshold=16 -O2 -optc-O3 -Wall
-FLAGS:=$(FLAGS) -prof -fprof-auto
+#FLAGS:=$(FLAGS) -prof -fprof-auto
 BUILD_DIR=./build
 BIN=./aoc2021
-ARGS=+RTS -p
+ARGS=#+RTS -p
 
 SOURCES:=$(wildcard *.hs */*.hs)
 

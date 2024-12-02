@@ -19,8 +19,12 @@ import Challenges.Day12
 import Challenges.Day13
 import Challenges.Day14
 import Challenges.Day15
+import Challenges.Day16
+import Challenges.Day17
+import Challenges.Day18
+import Challenges.Day19
 
-runDay :: Aoc -> Int -> (String -> (String, String)) -> IO (Int, TimeSpec)
+runDay :: Aoc -> Int -> (String -> (String, String)) -> IO (Int, Double)
 runDay aoc day f = do
     putStrLn $ "[Day " ++ show day ++ "]"
     input <- getInput aoc 2021 day
@@ -31,17 +35,38 @@ runDay aoc day f = do
 
     putStrLn $ "  Part1: " ++ part1
     putStrLn $ "  Part2: " ++ part2
-    return (day, diffTimeSpec end start)
+    return (day, msTs $ diffTimeSpec end start)
 
-runDays :: Aoc -> [(Int, String -> (String, String))] -> IO [(Int, TimeSpec)]
+runDays :: Aoc -> [(Int, String -> (String, String))] -> IO [(Int, Double)]
 runDays _ [] = return []
 runDays aoc ds = mapM (uncurry (runDay aoc)) ds
 
-showTs :: TimeSpec -> String
-showTs = (++ "ms") . show . (/100) . (fromIntegral . (`div` 10000) . toNanoSecs :: TimeSpec -> Double)
+msTs :: TimeSpec -> Double
+msTs = (/100) . (fromIntegral . (`div` 10000) . toNanoSecs :: TimeSpec -> Double)
 
-printTime :: (Int, TimeSpec) -> IO ()
-printTime (day, ts) = putStrLn $ "  Day " ++ show day ++ ": " ++ showTs ts
+wholeDigits :: Double -> Int
+wholeDigits x | x < 1.0 = 1
+              | otherwise = (+1) $ floor $ logBase 10 $ (realToFrac :: (Double -> Float)) x
+
+showI :: Int -> Int -> String
+showI digits i = leftPad ++ str
+    where str = show i
+          leftPad = replicate (digits - length str) ' '
+
+showF :: Int -> Int -> Double -> String
+showF digits places d = leftPad ++ take len str ++ rightPad
+    where str = show d 
+          dts = wholeDigits d
+          len = dts + 1 + places
+          leftPad = replicate (digits - dts) ' '
+          rightPad = replicate (len - length str) '0'
+
+printTime :: (Int, Double) -> IO ()
+printTime (day, ts) = putStrLn $ "  Day " ++ showI 2 day ++ ": " ++ col ts where
+    col v | v < 015.0 = "\^[[92m" ++ s v ++ "ms\^[[0m"
+          | v < 100.0 = "\^[[93m" ++ s v ++ "ms\^[[0m"
+          | otherwise = "\^[[91m" ++ s v ++ "ms\^[[0m"
+    s = showF 3 2
 
 dayDummy :: String -> (String, String)
 dayDummy _ = ("none", "none")
@@ -63,7 +88,10 @@ days =
     , (13, day13)
     , (14, day14)
     , (15, day15)
-    , (15, day15')
+    , (16, day16)
+    , (17, day17)
+    , (18, day18)
+    , (19, day19)
     ]
 
 main :: IO ()
@@ -85,8 +113,8 @@ main = do
     let totalMeasured = diffTimeSpec end start
 
     putStrLn ""
-    putStrLn $ "Sum: " ++ showTs total
-    putStrLn $ "Total: " ++ showTs totalMeasured
+    putStrLn $ "Sum: " ++ showF 4 3 total ++ "ms (sum of individual runtime)"
+    putStrLn $ "Total: " ++ showF 4 3 (msTs totalMeasured) ++ "ms (total program runtime including IO)"
 
     putStrLn ""
     putStrLn "Done"

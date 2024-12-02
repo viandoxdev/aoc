@@ -1,0 +1,5 @@
+(library
+ (name aoc2024)
+ (libraries 
+   cohttp-lwt-unix
+   days))
