@@ -1,2 +1,1 @@
-let day12 _input =
-  ("TODO", "TODO")
+let day12 _input = ("TODO", "TODO")
