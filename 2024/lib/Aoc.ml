@@ -25,8 +25,7 @@ let fetch_input ctx day =
     ^ "/input"
   in
   let headers = Cohttp.Header.init_with "Cookie" ("session=" ^ ctx.session) in
-  Client.get ~headers uri >>= fun (_, body) ->
-  body |> Cohttp_lwt.Body.to_string >|= fun body -> body
+  Client.get ~headers uri >>= fun (_, body) -> body |> Cohttp_lwt.Body.to_string
 
 let input ctx day =
   if not (Sys.file_exists "inputs") then Sys.mkdir "inputs" 0o777;
@@ -43,7 +42,8 @@ let input ctx day =
     output_string oc input;
     input
 
-let days = [ (1, Day01.day01); (2, Day02.day02); (3, Day03.day03) ]
+let days =
+  [ (1, Day01.day01); (2, Day02.day02); (3, Day03.day03); (4, Day04.day04) ]
 
 let run_day ctx (day, fn) =
   let inp = input ctx day in
