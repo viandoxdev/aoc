@@ -43,7 +43,7 @@ let input ctx day =
     input
 
 let days =
-  [ (1, Day01.day01); (2, Day02.day02); (3, Day03.day03); (4, Day04.day04) ]
+  [ (1, Day01.day01); (2, Day02.day02); (3, Day03.day03); (4, Day04.day04) ; (5, Day05.day05) ]
 
 let run_day ctx (day, fn) =
   let inp = input ctx day in

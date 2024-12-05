@@ -27,3 +27,5 @@ let remove_nth n = List.filteri (fun i _ -> i != n)
 
 let print_int_list xs =
   print_endline @@ "[" ^ (String.concat "; " @@ List.map string_of_int xs) ^ "]"
+
+let id x = x
