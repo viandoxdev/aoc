@@ -29,3 +29,10 @@ let print_int_list xs =
   print_endline @@ "[" ^ (String.concat "; " @@ List.map string_of_int xs) ^ "]"
 
 let id x = x
+
+let grid_dim grid =
+  let w = Array.length grid in
+  let h = Array.length grid.(0) in
+  (w, h)
+
+let int_of_bool = function true -> 1 | false -> 0
