@@ -1,4 +1,5 @@
 open Array
+open Utils
 
 type cell = X | M | A | S
 
@@ -19,11 +20,6 @@ let parse input =
         line)
     lines;
   grid
-
-let grid_dim grid =
-  let w = Array.length grid in
-  let h = Array.length grid.(0) in
-  (w, h)
 
 let get_grid grid (x, y) =
   let w, h = grid_dim grid in
