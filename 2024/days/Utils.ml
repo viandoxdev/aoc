@@ -36,3 +36,13 @@ let grid_dim grid =
   (w, h)
 
 let int_of_bool = function true -> 1 | false -> 0
+
+let pows =
+  Array.of_list @@ Iter.(iterate (fun x -> x * 10) 1 |> take 20 |> to_list)
+
+let int_width = Ocaml_intrinsics.Int.count_leading_zeros 0
+
+let log10 n =
+  let b = int_width - 1 - Ocaml_intrinsics.Int.count_leading_zeros n in
+  let a = b * 77 / 256 in
+  1 + a + int_of_bool (n >= pows.(a + 1))
