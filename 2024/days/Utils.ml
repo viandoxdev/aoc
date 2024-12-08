@@ -46,3 +46,30 @@ let log10 n =
   let b = int_width - 1 - Ocaml_intrinsics.Int.count_leading_zeros n in
   let a = b * 77 / 256 in
   1 + a + int_of_bool (n >= pows.(a + 1))
+
+module Point = struct
+  type int_line = { p : int; q : int; x1 : int; y1 : int }
+
+  let line_of_points (x1, y1) (x2, y2) =
+    if x1 = x2 then { p = 1; q = 0; x1; y1 }
+    else
+      let m = Q.of_ints (y2 - y1) (x2 - x1) in
+      let p, q = (Z.to_int m.num, Z.to_int m.den) in
+      { p; q; x1; y1 }
+
+  let line_get_point { p; q; x1; y1 } k =
+    let x = (k * q) + x1 in
+    let y = if q != 0 then (((p * x) - (p * x1)) / q) + y1 else y1 + k in
+    (x, y)
+
+  let sub (x1, y1) (x2, y2) = (x1 - x2, y1 - y2)
+  let add (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
+  let scale k (x, y) = (k * x, k * y)
+
+  let string_of_point (x, y) =
+    "(" ^ string_of_int x ^ "," ^ string_of_int y ^ ")"
+
+  let sq_dist (x1, y1) (x2, y2) =
+    let dx, dy = (x2 - x1, y2 - y1) in
+    (dx * dx) + (dy * dy)
+end
