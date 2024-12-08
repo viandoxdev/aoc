@@ -51,6 +51,7 @@ let days =
     (5, Day05.day05);
     (6, Day06.day06);
     (7, Day07.day07);
+    (8, Day08.day08);
   ]
 
 let run_day ctx (day, fn) =
