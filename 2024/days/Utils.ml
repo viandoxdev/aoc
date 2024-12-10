@@ -73,3 +73,5 @@ module Point = struct
     let dx, dy = (x2 - x1, y2 - y1) in
     (dx * dx) + (dy * dy)
 end
+
+let ( % ) f g x = f @@ g x
