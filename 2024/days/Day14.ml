@@ -46,13 +46,16 @@ let part2 robots =
   let grid = Array.make_matrix width height false in
   let open Iter in
   let rec solve n =
-    if n > width * height then failwith "Couln't find tree :("
+    if n > width * height then failwith "Couln't find the tree :("
     else (
       List.iter
         (fun r ->
           let x, y = (step (n - 1) r).p in
-          grid.(x).(y) <- false;
+          grid.(x).(y) <- false)
+        robots;
 
+      List.iter
+        (fun r ->
           let x, y = (step n r).p in
           grid.(x).(y) <- true)
         robots;
