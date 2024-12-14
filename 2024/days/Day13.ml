@@ -14,8 +14,8 @@ module P = struct
     both (string "Prize: X=" *> digits <* string ", Y=") (digits <* char '\n')
 
   let machine =
-    both (both button button) prize <* many (char '\n')
-    >>= fun ((a, b), p) -> return { a; b; p }
+    both (both button button) prize <* many (char '\n') >>= fun ((a, b), p) ->
+    return { a; b; p }
 
   let parse = Result.get_ok % Angstrom.parse_string ~consume:All (many machine)
 end

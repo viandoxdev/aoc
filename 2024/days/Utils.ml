@@ -3,6 +3,8 @@ open Angstrom
 let is_digit = function '0' .. '9' -> true | _ -> false
 let is_whitespace = function ' ' -> true | _ -> false
 let digits = take_while1 is_digit >>| fun x -> int_of_string x
+let negative_digits = char '-' *> digits >>| ( ~- )
+let signed_digits = digits <|> negative_digits
 let whitespace = take_while is_whitespace
 
 let rec head_nth n xs =
