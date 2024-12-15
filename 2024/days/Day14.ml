@@ -43,44 +43,15 @@ let part1 robots =
   tl * tr * bl * br
 
 let part2 robots =
-  let grid = Array.make_matrix width height false in
   let open Iter in
-  let rec solve n =
-    if n > width * height then failwith "Couln't find the tree :("
-    else (
-      List.iter
-        (fun r ->
-          let x, y = (step (n - 1) r).p in
-          grid.(x).(y) <- false)
-        robots;
 
-      List.iter
-        (fun r ->
-          let x, y = (step n r).p in
-          grid.(x).(y) <- true)
-        robots;
-
-      let count_consecutives arr =
-        let max, _ =
-          snoc (of_array arr) false
-          |> fold
-               (fun (max, cur) -> function
-                 | true -> (max, cur + 1)
-                 | false when cur > max -> (cur, 0)
-                 | false -> (max, 0))
-               (0, 0)
-        in
-        max
-      in
-
-      let xs =
-        0 -- (width - 1) |> map (count_consecutives % Array.get grid) |> sum
-      in
-
-      if xs >= 200 then n else solve (n + 1))
+  let tmod m key =
+    (0 -- (m - 1)) |> map (fun n -> n, of_list robots |> map (step n) |> map (float_of_int % key) |> variance) |> min_exn ~lt: (fun (_, a) (_, b) -> a < b) |> fst
   in
+  let (xm, ym) = (tmod width (fun {p=(x,_);_} -> x), tmod height (fun {p=(_,y);_} -> y)) in
+  let (_, u, v) = Z.(gcdext (~$ width) (~$ height)) in
 
-  solve 0
+  (width * ym * (Z.to_int u) + height * xm * (Z.to_int v)) %. (width * height)
 
 let day14 input =
   let robots = P.parse input in
