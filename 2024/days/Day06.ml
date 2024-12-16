@@ -42,19 +42,17 @@ let part2 grid (gx, gy) visited =
   Iter.(
     of_array visited
     |> mapi (fun x col ->
-           of_array col
-           |> zip_i
+           of_array col |> zip_i
            |> filter (fun (y, e) -> e != [] && not (x = gx && y = gy))
            |> filter (fun (y, _) ->
                   grid.(x).(y) <- Obstacle;
 
-                  for x = 0 to (w - 1) do
+                  for x = 0 to w - 1 do
                     Array.fill buf.(x) 0 h []
                   done;
 
                   let loops =
-                    Option.is_none
-                    @@ walk grid buf (gx, gy) (0, -1)
+                    Option.is_none @@ walk grid buf (gx, gy) (0, -1)
                   in
                   grid.(x).(y) <- Empty;
                   loops)

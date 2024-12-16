@@ -44,14 +44,24 @@ let part1 robots =
 
 let part2 robots =
   let open Iter in
-
   let tmod m key =
-    (0 -- (m - 1)) |> map (fun n -> n, of_list robots |> map (step n) |> map (float_of_int % key) |> variance) |> min_exn ~lt: (fun (_, a) (_, b) -> a < b) |> fst
+    0 -- (m - 1)
+    |> map (fun n ->
+           ( n,
+             of_list robots
+             |> map (step n)
+             |> map (float_of_int % key)
+             |> variance ))
+    |> min_exn ~lt:(fun (_, a) (_, b) -> a < b)
+    |> fst
   in
-  let (xm, ym) = (tmod width (fun {p=(x,_);_} -> x), tmod height (fun {p=(_,y);_} -> y)) in
-  let (_, u, v) = Z.(gcdext (~$ width) (~$ height)) in
+  let xm, ym =
+    ( tmod width (fun { p = x, _; _ } -> x),
+      tmod height (fun { p = _, y; _ } -> y) )
+  in
+  let _, u, v = Z.(gcdext ~$width ~$height) in
 
-  (width * ym * (Z.to_int u) + height * xm * (Z.to_int v)) %. (width * height)
+  ((width * ym * Z.to_int u) + (height * xm * Z.to_int v)) %. (width * height)
 
 let day14 input =
   let robots = P.parse input in

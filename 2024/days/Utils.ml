@@ -81,15 +81,18 @@ let ( %> ) f g x = g @@ f x
 
 let variance i =
   let open Iter in
-  let (count, mean, m2) = fold (fun (c, m, m2) x -> 
-    if c = 0 then (1, x, 0.) else 
-    let d = x -. m in
-    let m = m +. d /. (float_of_int @@ c + 1) in
-    let d2 = x -. m in
-    (c + 1, m, m2 +. d *. d2)
-    ) (0, 0., 0.) i
+  let count, mean, m2 =
+    fold
+      (fun (c, m, m2) x ->
+        if c = 0 then (1, x, 0.)
+        else
+          let d = x -. m in
+          let m = m +. (d /. (float_of_int @@ (c + 1))) in
+          let d2 = x -. m in
+          (c + 1, m, m2 +. (d *. d2)))
+      (0, 0., 0.) i
   in
-  if count <= 1 then nan else m2 /. (float_of_int count)
+  if count <= 1 then nan else m2 /. float_of_int count
 
 let fst (a, _) = a
 let snd (_, a) = a
