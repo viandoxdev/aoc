@@ -23,6 +23,11 @@ let sliding_pairs xs =
   in
   List.rev pairs
 
+let rec pairs = function
+  | [] -> []
+  | x :: [] -> []
+  | a :: b :: xs -> (a, b) :: pairs xs
+
 let reduce f xs = List.fold_left f (List.hd xs) (List.tl xs)
 let sum xs = reduce ( + ) xs
 let remove_nth n = List.filteri (fun i _ -> i != n)
