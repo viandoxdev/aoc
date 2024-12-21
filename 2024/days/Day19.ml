@@ -110,5 +110,5 @@ let day19 input =
   let open Iter in
   let results = on_list (map @@ StripeTree.count tree) designs in
 
-  ( string_of_int (of_list results |> filter (( > ) 0) |> length),
+  ( string_of_int (of_list results |> filter (( < ) 0) |> length),
     string_of_int (of_list results |> sum) )
