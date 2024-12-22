@@ -6,6 +6,5 @@
    (:standard -O3)))
  (profile
   (ocamlopt_flags
-   (:standard -O3 ))
-  (ocamlc_flags
-    :standard -g)))
+   (:standard -O3))
+  (ocamlc_flags :standard -g)))
