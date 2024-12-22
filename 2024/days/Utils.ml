@@ -25,7 +25,7 @@ let sliding_pairs xs =
 
 let rec pairs = function
   | [] -> []
-  | x :: [] -> []
+  | _ :: [] -> []
   | a :: b :: xs -> (a, b) :: pairs xs
 
 let reduce f xs = List.fold_left f (List.hd xs) (List.tl xs)
@@ -86,7 +86,7 @@ let ( %> ) f g x = g @@ f x
 
 let variance i =
   let open Iter in
-  let count, mean, m2 =
+  let count, _, m2 =
     fold
       (fun (c, m, m2) x ->
         if c = 0 then (1, x, 0.)

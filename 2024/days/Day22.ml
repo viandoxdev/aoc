@@ -11,36 +11,40 @@ let step s =
     c
   )
 
-let sequence (a, b, c, d) =
-  let (a, b, c, d) = Int32.(of_int a, of_int b, of_int c, of_int d) in
-  Int32.(d |> logor (shift_left c 5) |> logor (shift_left b 10) |> logor (shift_left a 15))
+let map_quad f (a, b, c, d) =
+  (f a, f b, f c, f d)
 
-let change seq v =
-  let v = Int32.of_int v in
-  Int32.(logor (sequence seq) (shift_left v 20))
+module Sequence = struct
+  type t = int32
 
-let profit_at seq c =
-  let open Int32 in
-  if logand (of_int 0xfffff) c = seq then 
-    Some (to_int @@ shift_right c 20)
-  else
-    None
+  let equal = Int32.equal
+  let hash a = Int32.to_int a
+  let of_tuple t =
+    let (a, b, c, d) = map_quad (Int32.of_int % ((+) 9)) t in
+    Int32.(d |> logor (shift_left c 5) |> logor (shift_left b 10) |> logor (shift_left a 15))
+  let to_tuple s =
+    let open Int32 in
+    let mask = of_int 0x1f in
+    map_quad (((+) (-9)) % to_int % (logand mask) % (shift_right s)) (15,10,5,0)
+end
 
-let changes secret =
-  let a = Array.make 1997 (Int32.of_int 0) in
+module Table = Hashtbl.Make(Sequence)
+
+let change_table ?(n=2001) secret =
+  let m = Table.create 2048 in
   let open Iter in
 
   iterate step secret
-    |> take 2001
-    |> fold_map (fun (a, b, c, d) v -> (b, c, d, v), change (b - a, c - b, d - b, v - d) v) (0, 0, 0, 0)
+    |> take n
+    |> map (fun x -> x mod 10)
+    |> fold_map (fun (a, b, c, d) v -> (b, c, d, v), (Sequence.of_tuple (b - a, c - b, d - c, v - d), v)) (0, 0, 0, 0)
     |> drop 4
-    |> zip_i
-    |> iter (fun (i, c) -> a.(i) <- c);
+    |> iter (fun (s, v) -> if not @@ Table.mem m s then Table.add m s v);
 
-  a
+  m
 
-let profit seq changes =
-  Option.value ~default: 0 @@ Array.find_map (profit_at seq) changes
+let profit seq table =
+  Option.value ~default:0 @@ Table.find_opt table seq
 
 let total_profit changes seq =
   let open Iter in
@@ -55,9 +59,9 @@ let part1 secrets =
 let part2 secrets =
   let open Iter in
   let r = -9 -- 9 in
-  let changes = on_list (map changes) secrets in
+  let changes = on_list (map change_table) secrets in
   product (product r r) (product r r)
-    |> map (fun ((a, b), (c, d)) -> print_endline @@ string_of_int a ^ "," ^ string_of_int b ^ "," ^ string_of_int c ^ "," ^ string_of_int d; sequence (a, b, c, d))
+    |> map (fun ((a, b), (c, d)) -> Sequence.of_tuple (a, b, c, d))
     |> map (total_profit changes)
     |> max_exn
 
