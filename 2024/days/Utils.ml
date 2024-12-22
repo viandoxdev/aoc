@@ -101,3 +101,7 @@ let variance i =
 
 let fst (a, _) = a
 let snd (_, a) = a
+
+let rec repeat f n s =
+  if n > 0 then repeat f (n - 1) (f s)
+  else s

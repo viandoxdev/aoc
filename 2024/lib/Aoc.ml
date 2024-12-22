@@ -65,6 +65,7 @@ let days =
     (19, Day19.day19);
     (20, Day20.day20);
     (21, Day21.day21);
+    (22, Day22.day22);
   ]
 
 let run_day ctx (day, fn) =
