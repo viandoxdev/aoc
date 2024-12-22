@@ -15,17 +15,17 @@ let map_quad f (a, b, c, d) =
   (f a, f b, f c, f d)
 
 module Sequence = struct
-  type t = int32
+  type t = int
 
-  let equal = Int32.equal
-  let hash a = Int32.to_int a
+  let equal = Int.equal
+  let hash a = a
   let of_tuple t =
-    let (a, b, c, d) = map_quad (Int32.of_int % ((+) 9)) t in
-    Int32.(d |> logor (shift_left c 5) |> logor (shift_left b 10) |> logor (shift_left a 15))
+    let (a, b, c, d) = map_quad (((+) 9)) t in
+    Int.(d |> logor (shift_left c 5) |> logor (shift_left b 10) |> logor (shift_left a 15))
   let to_tuple s =
-    let open Int32 in
-    let mask = of_int 0x1f in
-    map_quad (((+) (-9)) % to_int % (logand mask) % (shift_right s)) (15,10,5,0)
+    let open Int in
+    let mask = 0x1f in
+    map_quad (((+) (-9)) % (logand mask) % (shift_right s)) (15,10,5,0)
 end
 
 module Table = Hashtbl.Make(Sequence)
