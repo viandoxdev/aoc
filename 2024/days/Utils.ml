@@ -102,3 +102,6 @@ let variance i =
 let fst (a, _) = a
 let snd (_, a) = a
 let rec repeat f n s = if n > 0 then repeat f (n - 1) (f s) else s
+let map_double f (a, b) = (f a, f b)
+let map_triple f (a, b, c) = (f a, f b, f c)
+let map_quad f (a, b, c, d) = (f a, f b, f c, f d)
