@@ -14,8 +14,6 @@ let step s =
     let c = logand 0xffffff @@ logxor b (shift_left b 11) in
     c)
 
-let map_quad f (a, b, c, d) = (f a, f b, f c, f d)
-
 module Sequence = struct
   type t = int
 
