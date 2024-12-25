@@ -68,6 +68,7 @@ let days =
     (22, Day22.day22);
     (23, Day23.day23);
     (24, Day24.day24);
+    (25, Day25.day25);
   ]
 
 let run_day ctx (day, fn) =
@@ -117,7 +118,8 @@ let display_results res total_duration =
     (fun day ->
       print_endline @@ "[Day " ^ string_of_int day.number ^ "]";
       print_endline @@ "  Part1: " ^ day.part1;
-      print_endline @@ "  Part2: " ^ day.part2)
+      if day.part2 <> "" then
+        print_endline @@ "  Part2: " ^ day.part2)
     res;
 
   print_endline "";
