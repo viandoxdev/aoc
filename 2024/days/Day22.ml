@@ -29,39 +29,32 @@ module Sequence = struct
     map_quad (fun x -> (s / x mod 19) - 9) (19 * 19 * 19, 19 * 19, 19, 1)
 end
 
-let none = 10
+let profit_table secrets =
+  let n = 19 * 19 * 19 * 19 in
+  let profit = Array.make n 0 in
+  let seen = Array.make n 0 in
 
-let change_table secret =
-  let m = Array.make (19 * 19 * 19 * 19) none in
-  let open Iter in
-  iterate step secret |> take 2001
-  |> map (fun x -> x mod 10)
-  |> fold_map
-       (fun (p, s) v ->
-         let ns = Sequence.rot s (v - p) in
-         ((v, ns), (ns, v)))
-       (0, 0)
-  |> drop 4
-  |> iter (fun (s, v) -> if m.(s) == none then m.(s) <- v);
+  List.iteri
+    (fun i secret ->
+      let open Iter in
+      iterate step secret |> take 2001
+      |> map (fun x -> x mod 10)
+      |> fold_map
+           (fun (p, s) v ->
+             let ns = Sequence.rot s (v - p) in
+             ((v, ns), (ns, v)))
+           (0, 0)
+      |> drop 4
+      |> iter (fun (seq, v) ->
+             if seen.(seq) != i then (
+               profit.(seq) <- profit.(seq) + v;
+               seen.(seq) <- i)))
+    secrets;
 
-  m
+  profit
 
-let profit seq table =
-  let r = table.(seq) in
-  if r = none then 0 else r
-
-let total_profit changes seq =
-  let open Iter in
-  of_list changes |> map (profit seq) |> sum
-
-let part1 secrets =
-  let open Iter in
-  of_list secrets |> map (Utils.repeat step 2000) |> sum
-
-let part2 secrets =
-  let open Iter in
-  let changes = on_list (map change_table) secrets in
-  Sequence.all_sequences |> map (total_profit changes) |> max_exn
+let part1 secrets = Iter.(of_list secrets |> map (Utils.repeat step 2000) |> sum)
+let part2 = Array.fold_left max 0 % profit_table
 
 let day22 input =
   let secrets = parse input in
