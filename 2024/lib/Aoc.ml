@@ -128,7 +128,7 @@ let display_results res total_duration =
   List.iter
     (fun day ->
       print_endline @@ "  Day " ^ string_of_int day.number ^ ": "
-      ^ format_colored_duration 1.0 day.duration)
+      ^ format_colored_duration (1.0 /. 25.0) day.duration)
     res;
 
   print_endline "";

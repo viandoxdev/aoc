@@ -319,7 +319,7 @@ let part2 indices index_map cons_map cons_rev =
         in
         swap x y;
         pairs.(pair) <- (x, y)
-    | GateErrPartial (g, w) ->
+    | GateErrPartial _ ->
         failwith
           "Can't recover from this error (can't be tested as my input doesn't \
            have this issue)"

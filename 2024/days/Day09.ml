@@ -2,7 +2,7 @@ open Utils
 
 let parse input =
   let open Iter in
-  of_str input |> filter is_digit
+  snoc (of_str input) '0' |> filter is_digit
   |> map (fun c -> (int_of_char c - int_of_char '0', 0))
   |> map_by_2 (fun (a, _) (b, _) -> (a, b))
   |> mapi (fun i (a, b) -> (i, a, b))
@@ -27,44 +27,55 @@ let checksum files =
   let max_pos = Iter.(of_list files |> map (fun (_, a, _) -> a) |> sum) in
   aux files (List.rev files) 0 max_pos
 
-let id_eq i (j, _, _) = i = j
+type space = Cons of {
+  mutable next: space; 
+  mutable prev : space; 
+  mutable size: int; 
+  mutable at: int;
+} | Nil
 
-let reorder files =
-  let rec aux fwd arr buf n =
-    let open Iter in
-    match fwd with
-    | [] -> List.rev buf
-    | (i, b, f) :: fwd -> (
-        let e =
-          if f = 0 then None
-          else
-            n --^ 0
-            |> map (fun j -> arr.(j))
-            |> keep_some
-            |> find (fun e ->
-                   let j, b, _ = e in
-                   if b <= f && i != j then Some e else None)
-        in
-        match e with
-        | Some (j, p, _) -> aux ((i, b, 0) :: (j, p, f - p) :: fwd) arr buf n
-        | None ->
-            if Option.is_some arr.(i) then (
-              arr.(i) <- None;
-              aux fwd arr ((i, b, f) :: buf) n)
-            else
-              let pi, pb, pf = List.hd buf in
-              aux fwd arr ((pi, pb, pf + b + f) :: List.tl buf) n)
-  in
-
-  let arr = Array.of_list @@ List.map (fun x -> Some x) files in
-  let _, res =
-    List.fold_left
-      (fun (pos, a) (i, b, f) -> (pos + b + f, a + (i * sum_range pos b)))
-      (0, 0)
-    @@ aux files arr [] (List.length files - 1)
-  in
-  res
+let reorder input =
+  let file_checksum id size at = id * (size * at + size * (size - 1) / 2) in
+  let spaces = ref Nil in
+  let open Iter in
+  let (files_rev, _, _) = snoc (of_str input) '0' |> filter is_digit
+  |> map (fun c -> (int_of_char c - int_of_char '0', 0))
+  |> map_by_2 (fun (a, _) (b, _) -> (a, b))
+  |> foldi (fun (files, last_space, at) id (file, space) -> (
+    (id, file, at) :: files,
+    (if space > 0 then 
+      (let next_space = Cons {next = Nil ; prev = last_space ; size = space ; at = at + file} in
+        (match last_space with
+          | Nil -> spaces := next_space
+          | Cons last -> last.next <- next_space);
+        next_space)
+      else last_space),
+    at + file + space
+  )) ([], !spaces, 0) in
+  
+  of_list files_rev |> fold (fun total (id, fsize, fat) -> (
+    let rec aux = function
+      | Cons {next ; size ; _} when size < fsize -> aux next
+      | Cons {at ; _} when at >= fat -> aux Nil
+      | Cons {next ; prev ; size ; at} when size = fsize -> (
+        (match prev with 
+          | Nil -> spaces := next
+          | Cons cell -> cell.next <- next);
+        (match next with
+          | Nil -> ()
+          | Cons cell -> cell.prev <- prev);
+        total + file_checksum id fsize at)
+      | Cons space -> (
+        let at = space.at in
+        space.at <- at + fsize;
+        space.size <- space.size - fsize;
+        total + file_checksum id fsize at)
+      | Nil -> (
+        total + file_checksum id fsize fat
+      )
+    in aux !spaces
+  )) 0
 
 let day09 input =
   let files = parse input in
-  (string_of_int @@ checksum files, string_of_int @@ reorder files)
+  (string_of_int @@ checksum files, string_of_int @@ reorder input)
