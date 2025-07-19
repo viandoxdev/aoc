@@ -53,7 +53,9 @@ let profit_table secrets =
 
   profit
 
-let part1 secrets = Iter.(of_list secrets |> map (Utils.repeat step 2000) |> sum)
+let part1 secrets =
+  Iter.(of_list secrets |> map (Utils.repeat step 2000) |> sum)
+
 let part2 = Array.fold_left max 0 % profit_table
 
 let day22 input =

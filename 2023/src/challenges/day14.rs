@@ -77,7 +77,7 @@ impl FromStr for State {
 impl State {
     fn key(&self) -> Vec<Bits> {
         const BITS: usize = Bits::BITS as usize;
-        let len = (self.width * self.height + BITS - 1) / BITS;
+        let len = (self.width * self.height).div_ceil(BITS);
         let mut key: Vec<Bits> = vec![0; len];
 
         for &(x, y) in &self.rocks {

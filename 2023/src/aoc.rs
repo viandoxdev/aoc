@@ -46,10 +46,12 @@ impl Aoc {
     pub async fn get_input(&self, day: u32) -> Result<String> {
         match std::fs::read_to_string(format!("./inputs/{day}")) {
             Ok(input) => Ok(input),
-            Err(err) => if err.kind() == ErrorKind::NotFound {
-                Ok(self.fetch_and_cache(day).await?)
-            } else {
-                Err(err.into())
+            Err(err) => {
+                if err.kind() == ErrorKind::NotFound {
+                    Ok(self.fetch_and_cache(day).await?)
+                } else {
+                    Err(err.into())
+                }
             }
         }
     }

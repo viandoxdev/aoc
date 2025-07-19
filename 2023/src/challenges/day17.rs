@@ -13,7 +13,7 @@ enum Direction {
     West,
     South,
     East,
-    NoDirection,
+    Directionless,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct OpenNode {
@@ -62,7 +62,7 @@ pub async fn day17(input: String) -> Result<(String, String)> {
         let mut open_set = HashSet::<NodeKey>::default();
         let mut gscore = HashMap::<NodeKey, u32>::default();
 
-        let start = OpenNode::new(0, 0, NoDirection, heuristics(0, 0));
+        let start = OpenNode::new(0, 0, Directionless, heuristics(0, 0));
 
         gscore.insert(start.key(), 0);
         open.push(start);

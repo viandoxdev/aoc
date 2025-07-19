@@ -1,44 +1,14 @@
 use std::{
-    collections::VecDeque,
-    fmt::Display,
+    collections::{hash_map::Entry, VecDeque},
     mem::MaybeUninit,
-    ops::{Deref, Range},
     str::FromStr,
     sync::Arc,
 };
 
-use anyhow::{anyhow, Context, Error, Result};
+use anyhow::{Context, Error, Result};
 use itertools::Itertools;
 use num::Integer;
 use rustc_hash::{FxHashMap, FxHashSet};
-
-struct DispDests<'a>(&'a [ModuleKey]);
-struct DispLow(bool);
-
-impl<'a> Display for DispDests<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[")?;
-        let mut a = false;
-        for &ModuleKey { index, number } in self.0 {
-            if a {
-                write!(f, ",")?;
-            }
-            a = true;
-            write!(f, "{index}.{number}")?;
-        }
-        write!(f, "]")
-    }
-}
-
-impl Display for DispLow {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.0 {
-            write!(f, "low")
-        } else {
-            write!(f, "high")
-        }
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct ModuleKey {
@@ -73,7 +43,6 @@ enum ModuleState {
 #[derive(Debug, Clone, Copy)]
 struct Module {
     index: usize,
-    name: &'static str,
     dests: &'static [ModuleKey],
     sources: &'static [usize],
     kind: ModuleKind,
@@ -165,7 +134,7 @@ impl FromStr for State {
 
         // Go over destinations and names
         for (index, &(_, name, dests_str)) in modules_str.iter().enumerate() {
-            if dests_str != "" {
+            if !dests_str.is_empty() {
                 let dests_start = dests_store.len();
                 dests_store.extend(dests_str.split(", ").map(|s| {
                     let dest_index = name_table[s];
@@ -195,18 +164,15 @@ impl FromStr for State {
         drop(sources);
 
         let dests_store: &'static [ModuleKey] = &*dests_store.leak();
-        let name_store: &'static str = &*name_store.leak();
         let sources_store: &'static [usize] = &*sources_store.leak();
 
         for (index, (kind, _, _)) in modules_str.into_iter().enumerate() {
             let dests = &dests_store[dests_slices[index].clone()];
-            let name = &name_store[name_slices[index].clone()];
             let sources = &sources_store[sources_slices[index].clone()];
             let source_count = sources_slices[index].len();
 
             modules[index].write(Module {
                 index,
-                name,
                 dests,
                 sources,
                 kind: match kind {
@@ -392,11 +358,11 @@ pub async fn day20(input: String) -> Result<(String, String)> {
             for iter in 1u64.. {
                 state.press_button::<false>(&mask);
                 let state_value = state.get_state(&mask);
-                if past_states.contains_key(&state_value) {
+                if let Entry::Vacant(entry) = past_states.entry(state_value) {
+                    entry.insert(iter);
+                } else {
                     lcm = lcm.lcm(&iter);
                     break;
-                } else {
-                    past_states.insert(state_value, iter);
                 }
             }
         }

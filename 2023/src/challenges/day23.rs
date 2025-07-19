@@ -49,7 +49,7 @@ pub async fn day23(input: String) -> Result<(String, String)> {
             cur + width + 1,
         ]
         .into_iter()
-        .filter_map(move |i| {
+        .filter(move |&i| {
             let t = tiles.get(i).copied().unwrap_or(Wall);
             let valid = if i < cur {
                 // Can't take down and right slopes if they are above or on the left of us
@@ -57,7 +57,7 @@ pub async fn day23(input: String) -> Result<(String, String)> {
             } else {
                 matches!(t, Floor | DownSlope | RightSlope)
             };
-            (valid && !visited[i]).then_some(i)
+            valid && !visited[i]
         })
     }
 
@@ -80,7 +80,7 @@ pub async fn day23(input: String) -> Result<(String, String)> {
                     // This clones
                     for next in options.drain(1..) {
                         // Not a fan of the code duplication, but both chunks are actually quite
-                        // different in subtles ways (the continues don't point to the same loop, a
+                        // different in subtle ways (the continues don't point to the same loop, a
                         // clone becomes a move and next_taken doesn't exist in the second)
                         if next == end_index {
                             longest = longest.max(steps);
@@ -119,7 +119,7 @@ pub async fn day23(input: String) -> Result<(String, String)> {
             }
         }
 
-        // Pre proccess graph to collapse a number of nodes
+        // Pre process graph to collapse a number of nodes
         let (edges, vertex_count, start_vertex, end_vertex) = {
             const NONE: usize = usize::MAX;
 

@@ -4,14 +4,12 @@ use std::{
 };
 
 use anyhow::Result;
-use chrono::{FixedOffset, Utc, TimeZone, Datelike};
 use std::future::Future;
 use tracing_subscriber::prelude::*;
 
 use aoc::Aoc;
 use challenges::*;
 
-mod utils;
 mod aoc;
 mod challenges;
 
@@ -166,19 +164,17 @@ async fn main() -> Result<()> {
         Day::new(20, day20),
         Day::new(21, day21),
         Day::new(22, day22),
-        Day::new(23, day23), // TODO: fix
-        //Day::new(24, day24),
-        //Day::new(25, day25),
+        Day::new(23, day23),
+        Day::new(24, day24),
+        Day::new(25, day25),
     ];
-
-    let days = &days[20..21]; // TODO: Remove that
 
     let session_file = std::fs::read_to_string("../session")?;
     let session = session_file.trim_end();
     let aoc = Aoc::new(session);
     let mut results = Vec::with_capacity(days.len());
 
-    println!("Aoc 2023\n");
+    println!("AOC 2023\n");
 
     let start = Instant::now();
 
@@ -193,7 +189,11 @@ async fn main() -> Result<()> {
         println!("[Day {day}]");
         match res {
             DayResult::Success { part1, part2, .. } => {
-                println!("  Part1: {part1}\n  Part2: {part2}");
+                if part2.is_empty() {
+                    println!("  Part1: {part1}");
+                } else {
+                    println!("  Part1: {part1}\n  Part2: {part2}");
+                }
             }
             DayResult::SolveError { error, .. } => {
                 println!("\x1b[31m  Error when solving:\n  {error}\x1b[0m");
