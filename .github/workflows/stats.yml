@@ -13,7 +13,7 @@ jobs:
       with:
         python-version: '3.10'
     - name: Check cairo version
-      run: apt policy cairo
+      run: sudo apt install cairo
     - name: Install github linguist 
       run: gem install github-linguist
     - name: Install python dependencies
