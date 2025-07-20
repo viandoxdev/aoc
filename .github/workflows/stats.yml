@@ -6,20 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.0'
-    - uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-    - name: Check cairo version
-      run: sudo apt install cairo
-    - name: Install github linguist 
-      run: gem install github-linguist
-    - name: Install python dependencies
-      run: pip install -r requirements.txt
-    - name: Generate updated stats svg
-      run: python langs.py
+    - name: Ready assets directory
+      run: mkdir -p assets
+    - name: Generate lang statistics svgs
+      run: docker build . --output=./assets/
     - name: Push to branch
       uses: s0/git-publish-subdir-action@develop
       env:
