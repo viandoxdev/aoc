@@ -7,10 +7,14 @@ edition = "2024"
 rust-aoc = { path = "../rust-aoc" }
 tokio = { version = "1.34", features = ["full"] }
 anyhow = "1.0"
-itertools = "0.12"
+itertools = "0.14"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["tracing-log", "env-filter"] }
 parking_lot = "0.12"
 rayon = "1.8"
 num = "0.4.3"
-rustc-hash = "1.1"
+rustc-hash = "2.1"
+fixedbitset = "0.5"
+
+[build-dependencies]
+itertools = "0.14"
