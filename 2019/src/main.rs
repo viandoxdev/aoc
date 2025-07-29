@@ -2,6 +2,8 @@ use anyhow::Result;
 use tracing_subscriber::prelude::*;
 
 mod challenges;
+mod intcode;
+mod bigletters;
 
 use challenges::*;
 use rust_aoc::{AnyDay, Aoc, Day};
@@ -43,7 +45,7 @@ async fn main() -> Result<()> {
         Day::new(24, day24),
         Day::new(25, day25),
     ];
-    let days = &days[0..2];
+    let days = &days[0..17];
 
     Aoc::from_path("../session", 2019)?.run(days).await;
 
