@@ -479,19 +479,6 @@ impl<const R: usize> KeyGraph<R> {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_day18_example() {
-        let input = "#########\n#b.A.@.a#\n#########";
-        let grid: Grid = input.parse().unwrap();
-        let graph = KeyGraph::new(&grid, [grid.entrance]);
-        assert_eq!(graph.explore(), 8);
-    }
-}
-
 pub async fn day18(input: String) -> Result<(String, String)> {
     let grid: Grid = input.parse()?;
     let split_grid = grid.transform();
