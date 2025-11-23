@@ -1,8 +1,5 @@
 use std::{
-    collections::VecDeque,
-    hash::Hash,
-    ops::{Bound, RangeBounds},
-    str::FromStr,
+    collections::{BinaryHeap, VecDeque}, hash::Hash, ops::{Bound, RangeBounds}, str::FromStr
 };
 
 use anyhow::{Result, anyhow};
@@ -196,10 +193,6 @@ impl FromStr for Grid {
     }
 }
 
-// I am aware that dist has no need to belong in this struct (the first 16 bits right now)
-// But for some reason removing it decreases performances (2ms -> 8ms), this is obviously
-// stupid: I am litterally removing code, but I guess this changes how the queue behaves
-// (it really shouldn't but whatever).
 #[derive(Debug, Clone, Copy, Eq)]
 struct State<const R: usize> {
     inner: u64,
@@ -233,6 +226,15 @@ impl<const R: usize> State<R> {
         }
     }
     #[inline(always)]
+    fn with_dist(self, dist: usize) -> Self {
+        debug_assert!(dist <= 65535);
+        Self { inner: (self.inner & !0xFFFF) | dist as u64 }
+    }
+    #[inline(always)]
+    fn dist(self) -> usize {
+        (self.inner & 0xFFFF) as usize
+    }
+    #[inline(always)]
     fn keys(self) -> BitSet {
         BitSet {
             inner: (self.inner >> 16 & 0x7FFFFFF) as u32,
@@ -247,7 +249,7 @@ impl<const R: usize> State<R> {
 impl<const R: usize> PartialEq for State<R> {
     #[inline(always)]
     fn eq(&self, other: &Self) -> bool {
-        (self.inner ^ other.inner) >> 16 == 0
+        self.inner >> 16 == other.inner >> 16
     }
 }
 
@@ -409,21 +411,21 @@ impl<const R: usize> KeyGraph<R> {
 
     fn explore(&self) -> usize {
         // Dijkstra on the simplified graph
-        let mut queue = PriorityQueue::new();
+        let mut queue = BinaryHeap::new();
         let mut dist = FxHashMap::with_capacity_and_hasher(131071, FxBuildHasher::default());
         let start = State::new(0, [self.count; R], BitSet::empty());
         dist.insert(start, 0);
-        queue.push(0, start);
+        queue.push(start);
 
         let goal = BitSet::from_range(0..self.count);
 
-        while let Some((d, state)) = queue.pop() {
+        while let Some(state) = queue.pop() {
             if state.keys().contains_set(&goal) {
-                return d;
+                return state.dist();
             }
 
             let c_dist = dist[&state];
-            if d > c_dist {
+            if state.dist() > c_dist {
                 continue;
             }
 
@@ -434,13 +436,14 @@ impl<const R: usize> KeyGraph<R> {
                     .filter(|&k| state.keys().contains_set(&self.dependencies[k]))
                 {
                     let weight = self.distances[state.pos(robot)][n];
+                    let n_dist = c_dist + weight;
                     let n_state = state
                         .with_pos(robot, n)
-                        .with_key(n, n != self.count);
-                    let n_dist = c_dist + weight;
+                        .with_key(n, n != self.count)
+                        .with_dist(n_dist);
 
                     if n_dist < dist.get(&n_state).copied().unwrap_or(usize::MAX) {
-                        queue.push(n_dist, n_state);
+                        queue.push(n_state);
                         dist.insert(n_state, n_dist);
                     }
                 }
