@@ -196,6 +196,10 @@ impl FromStr for Grid {
     }
 }
 
+// I am aware that dist has no need to belong in this struct (the first 16 bits right now)
+// But for some reason removing it decreases performances (2ms -> 8ms), this is obviously
+// stupid: I am litterally removing code, but I guess this changes how the queue behaves
+// (it really shouldn't but whatever).
 #[derive(Debug, Clone, Copy, Eq)]
 struct State<const R: usize> {
     inner: u64,
@@ -213,13 +217,6 @@ impl<const R: usize> State<R> {
         Self { inner }
     }
     #[inline(always)]
-    fn with_dist(self, dist: usize) -> Self {
-        debug_assert!(dist <= 65535);
-        Self {
-            inner: (self.inner & !0xFFFF) | dist as u64,
-        }
-    }
-    #[inline(always)]
     fn with_pos(self, index: usize, pos: usize) -> Self {
         debug_assert!(pos <= 31);
         let shift = 43 + index * 5;
@@ -234,10 +231,6 @@ impl<const R: usize> State<R> {
         Self {
             inner: (self.inner & !(1 << shift)) | ((set as u64) << shift),
         }
-    }
-    #[inline(always)]
-    fn dist(self) -> usize {
-        (self.inner & 0xFFFF) as usize
     }
     #[inline(always)]
     fn keys(self) -> BitSet {
