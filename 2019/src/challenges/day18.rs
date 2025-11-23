@@ -1,5 +1,5 @@
 use std::{
-    collections::{BinaryHeap, VecDeque},
+    collections::VecDeque,
     hash::Hash,
     ops::{Bound, RangeBounds},
     str::FromStr,
@@ -7,7 +7,8 @@ use std::{
 
 use anyhow::{Result, anyhow};
 use itertools::Itertools;
-use rustc_hash::FxHashMap;
+use priority_queue::PriorityQueue;
+use rustc_hash::{FxBuildHasher, FxHashMap};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct BitSet {
@@ -35,24 +36,14 @@ impl BitSet {
         }
     }
     #[inline(always)]
-    fn intersection(&self, other: &BitSet) -> Self {
-        Self {
-            inner: self.inner & other.inner,
-        }
-    }
-    #[inline(always)]
     fn difference(&self, other: &BitSet) -> Self {
         Self {
-            inner: self.inner & (!other.inner)
+            inner: self.inner & (!other.inner),
         }
     }
     #[inline(always)]
     fn empty() -> Self {
         Self { inner: 0 }
-    }
-    #[inline(always)]
-    fn contains(&self, key: usize) -> bool {
-        self.inner & (1 << key) > 0
     }
     #[inline(always)]
     fn insert(&mut self, key: usize) {
@@ -95,8 +86,12 @@ impl Iterator for OnesIterator {
     type Item = usize;
     fn next(&mut self) -> Option<Self::Item> {
         let res = self.set.trailing_zeros();
-        self.set ^= 1 << res;
-        (res != 32).then_some(res as usize)
+        if res < 32 {
+            self.set ^= 1 << res;
+            Some(res as usize)
+        } else {
+            None
+        }
     }
 }
 
@@ -203,32 +198,83 @@ impl FromStr for Grid {
 
 #[derive(Debug, Clone, Copy, Eq)]
 struct State<const R: usize> {
-    poses: [usize; R],
-    keys: BitSet,
-    dist: usize,
+    inner: u64,
+}
+
+impl<const R: usize> State<R> {
+    #[inline(always)]
+    fn new(dist: usize, poses: [usize; R], keys: BitSet) -> Self {
+        let mut inner = 0u64;
+        for i in (0..R).rev() {
+            inner = (inner << 5) | poses[i] as u64;
+        }
+        inner = (inner << 27) | keys.inner as u64;
+        inner = (inner << 16) | dist as u64;
+        Self { inner }
+    }
+    #[inline(always)]
+    fn with_dist(self, dist: usize) -> Self {
+        debug_assert!(dist <= 65535);
+        Self {
+            inner: (self.inner & !0xFFFF) | dist as u64,
+        }
+    }
+    #[inline(always)]
+    fn with_pos(self, index: usize, pos: usize) -> Self {
+        debug_assert!(pos <= 31);
+        let shift = 43 + index * 5;
+        Self {
+            inner: (self.inner & !(0b11111 << shift)) | ((pos as u64) << shift),
+        }
+    }
+    #[inline(always)]
+    fn with_key(self, key: usize, set: bool) -> Self {
+        debug_assert!(key <= 27);
+        let shift = 16 + key;
+        Self {
+            inner: (self.inner & !(1 << shift)) | ((set as u64) << shift),
+        }
+    }
+    #[inline(always)]
+    fn dist(self) -> usize {
+        (self.inner & 0xFFFF) as usize
+    }
+    #[inline(always)]
+    fn keys(self) -> BitSet {
+        BitSet {
+            inner: (self.inner >> 16 & 0x7FFFFFF) as u32,
+        }
+    }
+    #[inline(always)]
+    fn pos(self, index: usize) -> usize {
+        (self.inner >> (43 + 5 * index) & 0b11111) as usize
+    }
 }
 
 impl<const R: usize> PartialEq for State<R> {
+    #[inline(always)]
     fn eq(&self, other: &Self) -> bool {
-        self.poses == other.poses && self.keys == other.keys
+        (self.inner ^ other.inner) >> 16 == 0
     }
 }
 
 impl<const R: usize> Hash for State<R> {
+    #[inline(always)]
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.poses.hash(state);
-        self.keys.hash(state);
+        (self.inner >> 16).hash(state);
     }
 }
 
 impl<const R: usize> Ord for State<R> {
+    #[inline(always)]
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         // Flip the order because a shorter distance is better than a longer one
-        other.dist.cmp(&self.dist)
+        (other.inner & 0xFFFF).cmp(&(self.inner & 0xFFFF))
     }
 }
 
 impl<const R: usize> PartialOrd for State<R> {
+    #[inline(always)]
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
@@ -370,55 +416,43 @@ impl<const R: usize> KeyGraph<R> {
 
     fn explore(&self) -> usize {
         // Dijkstra on the simplified graph
-        let mut queue = BinaryHeap::new();
-        let mut dist = FxHashMap::default();
-        let start = State {
-            dist: 0,
-            poses: [self.count; R],
-            keys: BitSet::empty(),
-        };
+        let mut queue = PriorityQueue::new();
+        let mut dist = FxHashMap::with_capacity_and_hasher(131071, FxBuildHasher::default());
+        let start = State::new(0, [self.count; R], BitSet::empty());
         dist.insert(start, 0);
-        queue.push(start);
+        queue.push(0, start);
 
         let goal = BitSet::from_range(0..self.count);
 
-        while let Some(state) = queue.pop() {
-            if state.keys.contains_set(&goal) {
-                return state.dist;
+        while let Some((d, state)) = queue.pop() {
+            if state.keys().contains_set(&goal) {
+                return d;
             }
 
-            if state.dist > dist[&state] {
+            let c_dist = dist[&state];
+            if d > c_dist {
                 continue;
             }
 
             for robot in 0..R {
-                for n in self.robot_keys[robot].difference(&state.keys).into_iter().filter(|&k| {
-                    state.keys.contains_set(&self.dependencies[k])
-                }) {
-                    let weight = self.distances[state.poses[robot]][n];
-                    let n_state = {
-                        let mut poses = state.poses;
-                        poses[robot] = n;
-                        let mut keys = state.keys;
-                        if n != self.count {
-                            keys.insert(n);
-                        }
+                for n in self.robot_keys[robot]
+                    .difference(&state.keys())
+                    .into_iter()
+                    .filter(|&k| state.keys().contains_set(&self.dependencies[k]))
+                {
+                    let weight = self.distances[state.pos(robot)][n];
+                    let n_state = state
+                        .with_pos(robot, n)
+                        .with_key(n, n != self.count);
+                    let n_dist = c_dist + weight;
 
-                        State {
-                            keys,
-                            poses,
-                            dist: dist[&state] + weight,
-                        }
-                    };
-
-                    if n_state.dist < dist.get(&n_state).copied().unwrap_or(usize::MAX) {
-                        queue.push(n_state);
-                        dist.insert(n_state, n_state.dist);
+                    if n_dist < dist.get(&n_state).copied().unwrap_or(usize::MAX) {
+                        queue.push(n_dist, n_state);
+                        dist.insert(n_state, n_dist);
                     }
                 }
             }
         }
-
         panic!("Couldn't find shortest path");
     }
 }
