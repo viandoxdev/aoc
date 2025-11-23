@@ -1,5 +1,8 @@
 use std::{
-    collections::{BinaryHeap, VecDeque}, hash::Hash, ops::{Bound, RangeBounds}, str::FromStr
+    collections::{BinaryHeap, VecDeque},
+    hash::Hash,
+    ops::{Bound, RangeBounds},
+    str::FromStr,
 };
 
 use anyhow::{Result, anyhow};
@@ -227,7 +230,9 @@ impl<const R: usize> State<R> {
     #[inline(always)]
     fn with_dist(self, dist: usize) -> Self {
         debug_assert!(dist <= 65535);
-        Self { inner: (self.inner & !0xFFFF) | dist as u64 }
+        Self {
+            inner: (self.inner & !0xFFFF) | dist as u64,
+        }
     }
     #[inline(always)]
     fn dist(self) -> usize {
@@ -409,16 +414,16 @@ impl<const R: usize> KeyGraph<R> {
     }
 
     fn heuristic(&self, state: State<R>) -> usize {
-        let mut h = 0;
-        for r in 0..R {
-            h += self.robot_keys[r]
-                .difference(&state.keys())
-                .into_iter()
-                .map(|k| self.distances[state.pos(r)][k])
-                .max()
-                .unwrap_or(0);
-        }
-        h
+        (0..R)
+            .map(|r| {
+                self.robot_keys[r]
+                    .difference(&state.keys())
+                    .into_iter()
+                    .map(|k| self.distances[state.pos(r)][k])
+                    .max()
+                    .unwrap_or(0)
+            })
+            .sum()
     }
 
     fn explore(&self) -> usize {
@@ -441,18 +446,14 @@ impl<const R: usize> KeyGraph<R> {
             }
 
             let f_cur = state.dist();
-            let g_cur = match dist.get(&state) {
-                Some(&g) => g,
-                None => continue,
+            // Truthfully this cannot fail but whatever
+            let Some(g_cur) = dist.get(&state).copied() else {
+                continue;
             };
 
-            // Heuristic check: f = g + h.
-            // If stored g is better than implied g (f - h), then this path is bad?
-            // No, if g_cur < (f_cur - h), it means we found a better path to this state already.
-            // Or simply, we can recompute h.
             let h_cur = self.heuristic(state);
             if f_cur > g_cur + h_cur {
-                 continue;
+                continue;
             }
 
             for robot in 0..R {
@@ -464,9 +465,7 @@ impl<const R: usize> KeyGraph<R> {
                     let weight = self.distances[state.pos(robot)][n];
                     let n_g = g_cur + weight;
 
-                    let n_state = state
-                        .with_pos(robot, n)
-                        .with_key(n, n != self.count);
+                    let n_state = state.with_pos(robot, n).with_key(n, n != self.count);
 
                     if n_g < dist.get(&n_state).copied().unwrap_or(usize::MAX) {
                         dist.insert(n_state, n_g);
