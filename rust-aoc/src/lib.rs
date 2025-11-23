@@ -107,14 +107,14 @@ impl Aoc {
         for res in &results {
             match res {
                 DayResult::Success { day, runtime, .. } => {
-                    println!("  Day {day}: {}", format_dur(*runtime))
+                    println!("  Day {day:02}: {}", format_dur(*runtime))
                 }
                 DayResult::SolveError { day, runtime, .. } => println!(
-                    "  Day {day}: {} \x1b[31;1m(failed)\x1b[0m",
+                    "  Day {day:02}: {} \x1b[31;1m(failed)\x1b[0m",
                     format_dur(*runtime)
                 ),
                 DayResult::InputError { day, .. } => {
-                    println!("  Day {day}: didn't run \x1b[31;1m(failed)\x1b[0m")
+                    println!("  Day {day:02}: didn't run \x1b[31;1m(failed)\x1b[0m")
                 }
             }
         }
@@ -240,8 +240,8 @@ pub fn format_dur(dur: Duration) -> String {
     let micros = dur.as_micros();
     let millis = dur.as_millis();
     match nanos {
-        0..=999 => format!("\x1b[92m{nanos}ns\x1b[0m"),
-        1_000..=999_999 => format!("\x1b[92m{micros}µs\x1b[0m"),
+        0..=999 => format!("\x1b[96m{nanos}ns\x1b[0m"),
+        1_000..=999_999 => format!("\x1b[96m{micros}µs\x1b[0m"),
         1_000_000..=999_999_999 => match millis {
             0..=15 => format!("\x1b[92m{millis}ms\x1b[0m"),
             16..=99 => format!("\x1b[93m{millis}ms\x1b[0m"),
