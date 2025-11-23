@@ -4,7 +4,6 @@ use std::{
 
 use anyhow::{Result, anyhow};
 use itertools::Itertools;
-use priority_queue::PriorityQueue;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -334,15 +333,15 @@ impl<const R: usize> KeyGraph<R> {
             visited.fill(false);
             let (kx, ky) = keys_locations[k];
             queue.push_back(((kx, ky), 0));
-            visited[kx + ky * grid.height] = true;
+            visited[kx + ky * grid.width] = true;
 
             while let Some((tile, d)) = queue.pop_front() {
                 for ((x, y), tile) in grid.neighbors(tile) {
-                    if visited[x + y * grid.height] {
+                    if visited[x + y * grid.width] {
                         continue;
                     }
 
-                    visited[x + y * grid.height] = true;
+                    visited[x + y * grid.width] = true;
                     queue.push_back(((x, y), d + 1));
 
                     if let Tile::Key(n) = tile {
@@ -409,24 +408,51 @@ impl<const R: usize> KeyGraph<R> {
         }
     }
 
+    fn heuristic(&self, state: State<R>) -> usize {
+        let mut h = 0;
+        for r in 0..R {
+            h += self.robot_keys[r]
+                .difference(&state.keys())
+                .into_iter()
+                .map(|k| self.distances[state.pos(r)][k])
+                .max()
+                .unwrap_or(0);
+        }
+        h
+    }
+
     fn explore(&self) -> usize {
-        // Dijkstra on the simplified graph
+        // A* on the simplified graph
         let mut queue = BinaryHeap::new();
         let mut dist = FxHashMap::with_capacity_and_hasher(131071, FxBuildHasher::default());
+
         let start = State::new(0, [self.count; R], BitSet::empty());
-        dist.insert(start, 0);
-        queue.push(start);
+        let start_h = self.heuristic(start);
+
+        // Queue stores f-score in the dist field
+        queue.push(start.with_dist(start_h));
+        dist.insert(start, 0); // Map stores g-score
 
         let goal = BitSet::from_range(0..self.count);
 
         while let Some(state) = queue.pop() {
             if state.keys().contains_set(&goal) {
-                return state.dist();
+                return dist[&state];
             }
 
-            let c_dist = dist[&state];
-            if state.dist() > c_dist {
-                continue;
+            let f_cur = state.dist();
+            let g_cur = match dist.get(&state) {
+                Some(&g) => g,
+                None => continue,
+            };
+
+            // Heuristic check: f = g + h.
+            // If stored g is better than implied g (f - h), then this path is bad?
+            // No, if g_cur < (f_cur - h), it means we found a better path to this state already.
+            // Or simply, we can recompute h.
+            let h_cur = self.heuristic(state);
+            if f_cur > g_cur + h_cur {
+                 continue;
             }
 
             for robot in 0..R {
@@ -436,20 +462,34 @@ impl<const R: usize> KeyGraph<R> {
                     .filter(|&k| state.keys().contains_set(&self.dependencies[k]))
                 {
                     let weight = self.distances[state.pos(robot)][n];
-                    let n_dist = c_dist + weight;
+                    let n_g = g_cur + weight;
+
                     let n_state = state
                         .with_pos(robot, n)
-                        .with_key(n, n != self.count)
-                        .with_dist(n_dist);
+                        .with_key(n, n != self.count);
 
-                    if n_dist < dist.get(&n_state).copied().unwrap_or(usize::MAX) {
-                        queue.push(n_state);
-                        dist.insert(n_state, n_dist);
+                    if n_g < dist.get(&n_state).copied().unwrap_or(usize::MAX) {
+                        dist.insert(n_state, n_g);
+                        let n_h = self.heuristic(n_state);
+                        queue.push(n_state.with_dist(n_g + n_h));
                     }
                 }
             }
         }
         panic!("Couldn't find shortest path");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_day18_example() {
+        let input = "#########\n#b.A.@.a#\n#########";
+        let grid: Grid = input.parse().unwrap();
+        let graph = KeyGraph::new(&grid, [grid.entrance]);
+        assert_eq!(graph.explore(), 8);
     }
 }
 
