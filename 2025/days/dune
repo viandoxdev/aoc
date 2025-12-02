@@ -1,0 +1,4 @@
+(library
+ (name days)
+ (flags (:standard -w -27 -w -33))
+ (libraries ocaml_intrinsics))
