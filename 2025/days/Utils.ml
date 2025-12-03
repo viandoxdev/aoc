@@ -4,7 +4,7 @@ let int_of_bool = function
     | true -> 1
     | false -> 0
 
-let powers_of_10 = [|1;10;100;1000;10000;100000;1000000;10000000;100000000;1000000000;10000000000|]
+let powers_of_10 = [|1;10;100;1000;10000;100000;1000000;10000000;100000000;1000000000;10000000000;100000000000;1000000000000;10000000000000;100000000000000;1000000000000000;10000000000000000;100000000000000000;1000000000000000000;|]
 
 let p10 = function
     | p when p < 0 -> 0 
@@ -19,3 +19,14 @@ let rec sum_range a b f =
     if a <= b then
         f a + sum_range (a + 1) b f
     else 0
+
+let trim_end_nl s = String.sub s 0 (String.length s - 1)
+
+let rec fold_range f acc range_start range_end =
+    if range_start > range_end then acc else
+    fold_range f (f acc range_start) (range_start + 1) range_end
+let rec fold_range_rev f acc range_start range_end =
+    if range_start > range_end then acc else
+    fold_range_rev f (f acc range_end) range_start (range_end - 1)
+
+let sum = List.fold_left (+) 0
