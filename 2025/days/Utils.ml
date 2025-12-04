@@ -30,3 +30,28 @@ let rec fold_range_rev f acc range_start range_end =
     fold_range_rev f (f acc range_end) range_start (range_end - 1)
 
 let sum = List.fold_left (+) 0
+
+let parse_grid init f input =
+    let width = String.index input '\n' in
+    let height = String.fold_right (fun c a -> a + int_of_bool (c = '\n')) input 0 in
+    let data = init width height in
+    ignore @@ String.fold_left (fun (x, y) c -> 
+        if c = '\n' then (0, y + 1)
+        else (
+            f x y c data;
+            (x+1, y)
+        )
+    ) (0, 0) input;
+    data
+
+let neighbours_8 = [(-1,-1);(-1,0);(-1,1);(0,-1);(0,1);(1,-1);(1,0);(1,1)]
+let inbounds_neighbours w h n x y = 
+    List.filter_map (fun (dx, dy) -> 
+        let x, y = x + dx, y + dy in
+        if x >= 0 && x < w && y >= 0 && y < h then Some (x, y) else None
+    ) n
+
+let dim a = (Array.length a.(0), Array.length a)
+
+let copy_grid g = 
+    Array.init (Array.length g) (fun y -> Array.copy g.(y))

@@ -47,7 +47,7 @@ let days =
     (1, Day01.day01);
     (2, Day02.day02);
     (3, Day03.day03);
-    (* (4, Day04.day04); *)
+    (4, Day04.day04);
     (* (5, Day05.day05); *)
     (* (6, Day06.day06); *)
     (* (7, Day07.day07); *)
