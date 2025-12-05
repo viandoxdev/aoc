@@ -55,3 +55,18 @@ let dim a = (Array.length a.(0), Array.length a)
 
 let copy_grid g = 
     Array.init (Array.length g) (fun y -> Array.copy g.(y))
+
+let string_find_index pat s =
+    let patlen, len = String.length pat, String.length s in
+    let rec aux i j =
+        if j = patlen then i - j
+        else if i = len then failwith "Not found"
+        else if pat.[j] = s.[i] then aux (i + 1) (j + 1)
+        else aux (i + 1) 0
+    in
+    aux 0 0
+
+let string_split_once pat s =
+    let patlen, len = String.length pat, String.length s in
+    let i = string_find_index pat s in
+    (String.sub s 0 i, String.sub s (i + patlen) (len - i - patlen))
