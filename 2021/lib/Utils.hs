@@ -4,10 +4,10 @@ import Data.List (tails, unfoldr, sort, group)
 
 splitOn :: Eq a => [a] -> [a] -> [[a]]
 splitOn _ [] = []
-splitOn p l =
+splitOn p l@(lh:lt) =
     if and ((length z == pl) : z)
         then [] : splitOn p (drop pl l)
-        else addToHead (head l) (splitOn p $ tail l)
+        else addToHead lh (splitOn p lt)
     where z = zipWith (==) p l
           pl = length p
           addToHead v (h:tl) = (v : h) : tl

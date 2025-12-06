@@ -100,12 +100,6 @@ edges = f <=< tails
 directedEdges :: [a] -> [(a, a)]
 directedEdges = (\(a, b) -> [(a, b), (b, a)]) <=< edges
 
-overlap :: [Vec3] -> [Vec3] -> Bool
-overlap a b = 
-  where
-    ea = directedEdges a
-    eb = directedEdges b
-
 solve :: [[Vec3]] -> Int
 solve [s] = length s
 solve (s : xs) = traceShow (mapMaybe f $ elems (xs :: [[Vec3]])) 0

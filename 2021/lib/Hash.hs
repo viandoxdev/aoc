@@ -2,7 +2,6 @@ module Hash (MurmurHash, Hashable, Hasher, newHash, addHash, endHash, thenHash) 
 import Data.Word
 import Data.Bits
 import Data.Coerce (coerce)
-import Data.List (foldl')
 import Data.Char (ord)
 import Numeric (showHex)
 

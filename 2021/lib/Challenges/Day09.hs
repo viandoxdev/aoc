@@ -1,6 +1,6 @@
 module Challenges.Day09 (day09) where
 import Data.Char (digitToInt)
-import Data.List
+import Data.List (transpose, sortBy)
 import Data.Array
 import Data.Array.ST (STArray, newArray, writeArray, readArray)
 import Control.Monad.ST
@@ -9,9 +9,10 @@ parse :: String -> [[Int]]
 parse = map (map digitToInt) . lines
 
 makeGrid :: [[Int]] -> Array (Int, Int) Int
-makeGrid a = listArray ((0, 0), (width, height)) $ concat $ transpose a
+makeGrid a@(h:_) = listArray ((0, 0), (width, height)) $ concat $ transpose a
     where height = length a - 1
-          width = length (head a) - 1
+          width = length h - 1
+makeGrid [] = array ((0, 0), (0, 0)) []
 
 (!?) :: Ix i => Array i e -> i -> Maybe e
 (!?) a i = if inRange (bounds a) i then Just (a!i) else Nothing
