@@ -70,3 +70,12 @@ let string_split_once pat s =
     let patlen, len = String.length pat, String.length s in
     let i = string_find_index pat s in
     (String.sub s 0 i, String.sub s (i + patlen) (len - i - patlen))
+
+let (<%) f g x = f (g x)
+let (%>) f g x = g (f x)
+
+let cons a l = a :: l
+
+let transpose = function
+    | [] -> []
+    | x::xs -> List.(fold_right (fun l a -> map2 cons l a) (x::xs) (map (fun _ -> []) x) )
