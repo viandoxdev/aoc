@@ -20,6 +20,13 @@ let rec sum_range a b f =
         f a + sum_range (a + 1) b f
     else 0
 
+let fst3 (a, _, _) = a
+let snd3 (_, b, _) = b
+let thd3 (_, _, c) = c
+let tmap2 f (a, b) = (f a, f b)
+let tmap3 f (a, b, c) = (f a, f b, f c)
+let tmap4 f (a, b, c, d) = (f a, f b, f c, f d)
+
 let trim_end_nl s = String.sub s 0 (String.length s - 1)
 
 let rec fold_range f acc range_start range_end =
@@ -34,27 +41,30 @@ let sum = List.fold_left (+) 0
 let parse_grid init f input =
     let width = String.index input '\n' in
     let height = String.fold_right (fun c a -> a + int_of_bool (c = '\n')) input 0 in
-    let data = init width height in
-    ignore @@ String.fold_left (fun (x, y) c -> 
-        if c = '\n' then (0, y + 1)
-        else (
-            f x y c data;
-            (x+1, y)
-        )
-    ) (0, 0) input;
-    data
+    fst3 @@ String.fold_left (fun (data, x, y) c -> 
+        if c = '\n' then (data, 0, y + 1)
+        else (f x y c data, x+1, y)
+    ) (init width height, 0, 0) input
+
+let dim a = (Array.length a, Array.length a.(0))
+
+let grid_safe_access g d =
+    let w, h = dim g in
+    fun x y -> if x >= 0 && x < w && y >= 0 && y < h then g.(x).(y) else d
+let grid_safe_write g =
+    let w, h = dim g in
+    fun x y v -> if x >= 0 && x < w && y >= 0 && y < h then g.(x).(y) <- v
 
 let neighbours_8 = [(-1,-1);(-1,0);(-1,1);(0,-1);(0,1);(1,-1);(1,0);(1,1)]
+
 let inbounds_neighbours w h n x y = 
     List.filter_map (fun (dx, dy) -> 
         let x, y = x + dx, y + dy in
         if x >= 0 && x < w && y >= 0 && y < h then Some (x, y) else None
     ) n
 
-let dim a = (Array.length a.(0), Array.length a)
-
 let copy_grid g = 
-    Array.init (Array.length g) (fun y -> Array.copy g.(y))
+    Array.init (Array.length g) (fun x -> Array.copy g.(x))
 
 let string_find_index pat s =
     let patlen, len = String.length pat, String.length s in
@@ -78,4 +88,5 @@ let cons a l = a :: l
 
 let transpose = function
     | [] -> []
-    | x::xs -> List.(fold_right (fun l a -> map2 cons l a) (x::xs) (map (fun _ -> []) x) )
+    | x::xs -> List.(fold_right (fun l a -> map2 cons l a) (x::xs) (map (fun _ -> []) x))
+

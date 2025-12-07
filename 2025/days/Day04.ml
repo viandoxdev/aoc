@@ -13,20 +13,23 @@ let is_paper n = function
 let parse =
     parse_grid 
         (fun w h -> Array.make_matrix w h Empty) 
-        (fun x y c g -> g.(y).(x) <- if c = '@' then Paper else Empty)
+        (fun x y c g -> 
+            g.(x).(y) <- if c = '@' then Paper else Empty;
+            g
+        )
 
 let paper_count n g x y =
     let w, h = dim g in
     List.fold_left 
-        (fun a (nx, ny) -> a + int_of_bool (is_paper n g.(ny).(nx))) 0 (inbounds_neighbours w h neighbours_8 x y)
+        (fun a (nx, ny) -> a + int_of_bool (is_paper n g.(nx).(ny))) 0 (inbounds_neighbours w h neighbours_8 x y)
 
 let remove_accessible_rolls n grid =
     let w, h = dim grid in
     sum_range 0 (h - 1) (fun y -> 
         sum_range 0 (w - 1) (fun x -> 
-            if not (is_paper n grid.(y).(x)) then 0 else
+            if not (is_paper n grid.(x).(y)) then 0 else
             let papers_neighbours = paper_count n grid x y in
-            if papers_neighbours <= 3 then (grid.(y).(x) <- Removed (n + 1); 1) else 0))
+            if papers_neighbours <= 3 then (grid.(x).(y) <- Removed (n + 1); 1) else 0))
 
 let solve_part1 grid =
     let grid = copy_grid grid in
