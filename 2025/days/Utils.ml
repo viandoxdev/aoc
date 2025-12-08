@@ -90,3 +90,39 @@ let transpose = function
     | [] -> []
     | x::xs -> List.(fold_right (fun l a -> map2 cons l a) (x::xs) (map (fun _ -> []) x))
 
+let id x = x
+
+let range a b = List.init (b - a + 1) ((+) a)
+
+let range_pairs a b = 
+    range a (b - 1) 
+        |> List.(
+            concat_map (fun i -> range (i + 1) b 
+                |> map (fun j -> i, j)))
+
+module UnionFind = struct
+    type t = {parents: int array; sizes: int array; mutable components: int}
+
+    let make n = { parents = Array.init n id; sizes = Array.make n 1; components = n }
+    let rec find x s = 
+        let parent = s.parents.(x) in
+        if parent <> x then (
+            let res = find parent s in
+            s.parents.(x) <- res;
+            res
+        ) else x
+    let union x y s =
+        let x, y = find x s, find y s in
+        if x <> y then begin
+            let sx, sy = s.sizes.(x), s.sizes.(y) in
+            let x, y, rx, ry = if sx < sy then y, x, sy, sx else x, y, sx, sy in
+
+            s.components <- s.components - 1;
+            s.parents.(y) <- x;
+            s.sizes.(x) <- rx + ry;
+            s.sizes.(y) <- 0;
+        end
+    let sizes s = Array.to_list s.sizes |> List.filter ((<) 0)
+    let size x s = s.sizes.(find x s)
+    let components s = s.components
+end

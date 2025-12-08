@@ -1,2 +1,5 @@
 _build
 inputs
+flamegraph.svg
+stacks.folded
+perf.data
