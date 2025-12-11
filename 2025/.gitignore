@@ -3,3 +3,4 @@ inputs
 flamegraph.svg
 stacks.folded
 perf.data
+perf.data.old

@@ -54,7 +54,7 @@ let days =
     (8, Day08.day08);
     (9, Day09.day09);
     (* (10, Day10.day10); *)
-    (* (11, Day11.day11); *)
+    (11, Day11.day11);
     (* (12, Day12.day12); *)
   ]
 
