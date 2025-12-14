@@ -126,21 +126,14 @@ let solve_echelon m y z =
 
     let norm_of = Array.fold_left (fun a x -> a + (max x 0)) 0 in
 
-    let update_best (cur_min, cur_best) norm x =
-        if norm < cur_min then begin 
-            Array.blit x 0 cur_best 0 (Array.length x);
-            Array.map_inplace (fun v -> if v = -1 then 0 else v) cur_best;
-            (norm, cur_best)
-        end else (cur_min, cur_best) in
-
     let free_variable_in_row x r =
         let rec aux i = if x.(i) = -1 && m.(r).(i) <> 0 then Some i else if i = 0 then None else aux (i - 1) in
         aux (Array.length x - 1) in
 
     let rec aux row best =
         let norm = norm_of x in
-        if norm > fst best then best else
-        if row < 0 then update_best best norm x
+        if norm > best then best else
+        if row < 0 then min best norm
         else match free_variable_in_row x row with
             | None -> aux (row - 1) best
             | Some free_index -> (
@@ -173,7 +166,7 @@ let solve_echelon m y z =
                         new_best
                     end
             ) in
-    aux (n - 1) (Int.max_int, Array.copy x)
+    aux (n - 1) Int.max_int
 
 let solve_part1 machines =
     List.map turn_on machines |> List.fold_left (+) 0
@@ -184,7 +177,7 @@ let min_joltage (n, _, buttons, joltages) =
     let p = echelon b in
     let j = mat_vect_prod p joltages in
     let m = Array.map (fold_bin (fun a j -> min a joltages.(j)) Int.max_int) buttons in
-    solve_echelon b j m |> fst
+    solve_echelon b j m
 
 let solve_part2 machines = 
     List.fold_left (fun a m -> a + min_joltage m) 0 machines
