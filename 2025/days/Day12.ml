@@ -31,11 +31,11 @@ let is_conclusively_out presents tree =
     tree.width * tree.height 
         < (List.mapi (fun i n -> n * Ocaml_intrinsics.Int.count_set_bits presents.(i)) tree.presents |> List.fold_left (+) 0)
 
-let is_conclusively_in presents tree =
+let is_conclusively_in _presents tree =
     let count = List.fold_left (+) 0 tree.presents in
     (tree.width / 3) * (tree.height / 3) >= count
 
-let is_in presents tree =
+let is_in _presents _tree =
     failwith "Unimplemented: my input doesn't have this case :/"
 
 let fits presents tree =

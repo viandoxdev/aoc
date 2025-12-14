@@ -34,12 +34,7 @@ let select i a =
         else aux (Int.shift_right i 1) (o + 1) in
     aux i 0
 
-let bin_of_int n =
-    if n = 0 then "0" else
-    let rec aux n = if n = 0 then "" else aux (n / 2) ^ if n mod 2 = 0 then "0" else "1" in
-    aux n
-
-let turn_on (n, lights, buttons, _) =
+let turn_on (_, lights, buttons, _) =
     let k = Array.length buttons in
     let m = Int.shift_left 1 k in
     range 0 (m - 1) 
@@ -124,29 +119,46 @@ let solve_echelon m y z =
     let n, k = mat_dim m in
     let x = Array.make k (-1) in
 
+    (* We are looking for solutions with positive integers, and we
+       need to compute partial norms (with unfixed variables) to prune 
+       useless branches, hence `max x 0` instead of `abs x` *)
     let norm_of = Array.fold_left (fun a x -> a + (max x 0)) 0 in
 
+    (* get the index of the last free variable in tow r (last since we solve top bottom) *)
     let free_variable_in_row x r =
         let rec aux i = if x.(i) = -1 && m.(r).(i) <> 0 then Some i else if i = 0 then None else aux (i - 1) in
         aux (Array.length x - 1) in
 
+    (* Backtracking branch and bound algorithm to find the minimal solution *)
     let rec aux row best =
         let norm = norm_of x in
+        (* If partial norm is already more than the best we've found, no need to go any further *)
         if norm > best then best else
+        (* Depending on the matrix, we may reach this point with some variables
+           left unfixed, but that means those variables don't change the end result 
+           and so we just need to set them to 0 (to minimize norm).
+
+           Moreover since all we care about is the norm, and our norm function 
+           already assumes 0 for unfixed variables, we don't even need to handle 
+           that case in the first place. *)
         if row < 0 then min best norm
         else match free_variable_in_row x row with
+            (* No more variables to fix in this row, go to the next one *)
             | None -> aux (row - 1) best
             | Some free_index -> (
+                (* How many variables need to be fixed in this row *)
                 let free_in_row = range_sum (fun j -> int_of_bool (x.(j) = -1 && m.(row).(j) <> 0)) 0 (k - 1) in
 
                 if free_in_row > 1 then begin
                     (* More than one variable needs to be fixed in this row.
                        We can't really guess anything here, just try everything *)       
                     let new_best = 
+                        (* Try all the values fitting in the range *)
                         range_fold (fun best v -> begin
                             x.(free_index) <- v;
                             aux row best
                         end) best 0 z.(free_index) in
+                    (* Backtrack *)
                     x.(free_index) <- (-1);
                     new_best
                 end else
@@ -160,8 +172,10 @@ let solve_echelon m y z =
                         (* System is incompatible with our constraints *)
                         best
                     else begin
+                        (* Only one possible value, and it works, go on *)
                         x.(free_index) <- value;
                         let new_best = aux (row - 1) best in
+                        (* Backtrack *)
                         x.(free_index) <- -1;
                         new_best
                     end
@@ -172,6 +186,21 @@ let solve_part1 machines =
     List.map turn_on machines |> List.fold_left (+) 0
 
 let min_joltage (n, _, buttons, joltages) =
+    (* Linear algebra interpretation:
+        - We consider the buttons as a single rectangular n by k matrix B of 0s and 1s.
+        - The expected joltages make up a vector J of size n.
+        - A solution X to the problem is a vector of size k that satisfies
+            B X = J
+          The number of button presses is the L1 norm of that vector.
+        - X and J are made up of positive integers
+        - Since no button removes joltages, we can compute a loose upper bound on each button
+          presses, making up a vector M of size k, we are then looking for the minimal (for the L1 norm)
+          solution to the following system:
+            B X = J and 0 <= X <= M
+        - To compute the solutions we first write B in echelon form:
+            P B = E
+          The system becomes
+            E X = P B X = P J and 0 <= X <= M *)
     let k = Array.length buttons in
     let b = Array.init_matrix n k (fun i j -> Int.logand 1 (Int.shift_right buttons.(j) i)) in
     let p = echelon b in
