@@ -55,32 +55,143 @@ let fold_bin f acc bin =
             aux (off + skip + 1) (Int.shift_right bin (skip + 1))  (f acc (off + skip))
     in aux 0 bin acc
 
-let string_of_button b = "(" ^ (fold_bin (fun a i -> string_of_int i :: a) [] b |> String.concat ",") ^ ")"
-let string_of_buttons bs = String.concat " " @@ List.map string_of_button @@ Array.to_list  bs
-let string_of_joltages jolts = "{" ^ (String.concat " " @@ List.map string_of_int @@ Array.to_list jolts) ^ "}"
+(* matrices are Arrays of rows *)
+let mat_dim m = Array.length m, Array.length m.(0)
 
-let push_button b jolts =
-    fold_bin (fun _ i -> jolts.(i) <- jolts.(i) - 1) () b
+(* matrix product of a by b *)
+let mat_prod a b =
+    let (n, m), (_, p) = mat_dim a, mat_dim b in
+    Array.init_matrix n p (fun i j -> range_sum (fun k -> a.(i).(k) * b.(k).(j)) 0 (m - 1))
 
-let can_press b jolts = fold_bin (fun f i -> f && jolts.(i) >= 1) true b
+let mat_vect_prod a x =
+    let (n, m) = mat_dim a in
+    Array.init n (fun i -> range_sum (fun j -> a.(i).(j) * x.(j)) 0 (m - 1))
 
-let min_joltage (_, _, buttons, joltage) =
-    let k = Array.length buttons in
-    let constraints = Array.mapi 
-        (fun i j -> 
-            range 0 (k - 1) 
-                |> List.filter (fun l -> Int.logand buttons.(l) (Int.shift_left 1 i) = 1),
-            j
-        ) joltage in
-    failwith ""
+let identity n =
+    Array.init_matrix n n (fun i j -> int_of_bool (i = j))
+
+(* n by n matrix that swaps rows i1 and i2 *)
+let swap_rows n i1 i2 =
+    Array.init_matrix n n (fun i j -> int_of_bool ((i = i1 && j = i2) || (i = i2 && j = i1) || (i <> i1 && i <> i2 && i = j)))
+
+(* n by n matrix that scales row k by s *)
+let scale_row n k s =
+    Array.init_matrix n n (fun i j -> if i = k && j = k then s else int_of_bool (i = j))
+
+(* n by n matrix that adds s times row i1 to row i2 *)
+let transvect_row n i1 i2 s =
+    Array.init_matrix n n (fun i j -> if i = j then 1 else if i = i2 && j = i1 then s else 0)
+
+let rec gcd a = function
+    | 0 -> a
+    | b -> gcd b (a mod b)
+
+let lcm a b = a * b / (gcd a b)
+
+let mat_copy mat =
+    Array.init (Array.length mat) (fun i -> Array.copy mat.(i))
+    
+let echelon mat =
+    let n, m = mat_dim mat in
+    range_fold (fun (p, r) j -> match range_find (fun i -> mat.(i).(j) <> 0) r (n - 1) with
+        | Some i0 -> (
+            (* fetch first non 0 value in column, swap with first row *)
+            let p = if i0 <> r then begin
+                let row = mat.(i0) in
+                mat.(i0) <- mat.(r);
+                mat.(r) <- row;
+                mat_prod (swap_rows n r i0) p
+            end else p in
+            
+            let a = mat.(r).(j) in
+
+            range_fold (fun p i -> let b = mat.(i).(j) in if b = 0 then p else begin
+                let c = abs (lcm a b) in
+                let ka, kb = c / a, c / b in
+
+                for j = 0 to (m - 1) do
+                    mat.(i).(j) <- mat.(i).(j) * kb - mat.(r).(j) * ka
+                done;
+
+                mat_prod (transvect_row n r i (-ka)) (mat_prod (scale_row n i kb) p)
+            end) p (r + 1) (n - 1), r + 1
+        )
+        | None -> p, r
+    ) (identity n, 0) 0 (m - 1) |> fst
+
+(* find the minimum L1 norm of the solutions to m x = y with m in echelon form and 0 <= x <= z *)
+let solve_echelon m y z =
+    let n, k = mat_dim m in
+    let x = Array.make k (-1) in
+
+    let norm_of = Array.fold_left (fun a x -> a + (max x 0)) 0 in
+
+    let update_best (cur_min, cur_best) norm x =
+        if norm < cur_min then begin 
+            Array.blit x 0 cur_best 0 (Array.length x);
+            Array.map_inplace (fun v -> if v = -1 then 0 else v) cur_best;
+            (norm, cur_best)
+        end else (cur_min, cur_best) in
+
+    let free_variable_in_row x r =
+        let rec aux i = if x.(i) = -1 && m.(r).(i) <> 0 then Some i else if i = 0 then None else aux (i - 1) in
+        aux (Array.length x - 1) in
+
+    let rec aux row best =
+        let norm = norm_of x in
+        if norm > fst best then best else
+        if row < 0 then update_best best norm x
+        else match free_variable_in_row x row with
+            | None -> aux (row - 1) best
+            | Some free_index -> (
+                let free_in_row = range_sum (fun j -> int_of_bool (x.(j) = -1 && m.(row).(j) <> 0)) 0 (k - 1) in
+
+                if free_in_row > 1 then begin
+                    (* More than one variable needs to be fixed in this row.
+                       We can't really guess anything here, just try everything *)       
+                    let new_best = 
+                        range_fold (fun best v -> begin
+                            x.(free_index) <- v;
+                            aux row best
+                        end) best 0 z.(free_index) in
+                    x.(free_index) <- (-1);
+                    new_best
+                end else
+                    (* There is only one free variabled in this row, compute its value 
+                       (from the others) and check compatibility *)
+                    let sum = y.(row) - (range_sum (fun j -> if x.(j) != -1 then m.(row).(j) * x.(j) else 0) 0 (k - 1)) in
+                    let coef = m.(row).(free_index) in
+                    let value = sum / coef in
+
+                    if value * coef <> sum || value < 0 || value > z.(free_index) then
+                        (* System is incompatible with our constraints *)
+                        best
+                    else begin
+                        x.(free_index) <- value;
+                        let new_best = aux (row - 1) best in
+                        x.(free_index) <- -1;
+                        new_best
+                    end
+            ) in
+    aux (n - 1) (Int.max_int, Array.copy x)
 
 let solve_part1 machines =
     List.map turn_on machines |> List.fold_left (+) 0
-let solve_part2 machines =
-    List.map min_joltage machines |> List.fold_left (+) 0
+
+let min_joltage (n, _, buttons, joltages) =
+    let k = Array.length buttons in
+    let b = Array.init_matrix n k (fun i j -> Int.logand 1 (Int.shift_right buttons.(j) i)) in
+    let p = echelon b in
+    let j = mat_vect_prod p joltages in
+    let m = Array.map (fold_bin (fun a j -> min a joltages.(j)) Int.max_int) buttons in
+    solve_echelon b j m |> fst
+
+let solve_part2 machines = 
+    List.fold_left (fun a m -> a + min_joltage m) 0 machines
 
 let day10 input =
     let machines = parse input in
     let part1 = solve_part1 machines in
     let part2 = solve_part2 machines in
+
     (string_of_int part1, string_of_int part2)

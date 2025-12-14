@@ -48,7 +48,7 @@ let solve_part2 grid splitters (sx, sy) =
         wp (x + 1) y (gp (x + 1) y + par_pos);
     ) splitters;
 
-    sum_range 0 (w - 1) (fun x -> parents_pos grid pos x (h - 1))
+    range_sum (fun x -> parents_pos grid pos x (h - 1)) 0 (w - 1) 
 
 let day07 input =
     let grid, splitters, start = parse input in

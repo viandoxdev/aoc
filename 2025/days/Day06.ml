@@ -7,7 +7,7 @@ let parse input =
             | [] -> failwith "bad input"
             | x::xs -> x ^ " ", List.rev xs |> List.map (fun s -> s ^ " ")
     in
-    let (s1, s2, _, _, _) = fold_range (fun (s1, s2, op, vers, hors) i -> 
+    let (s1, s2, _, _, _) = range_fold (fun (s1, s2, op, vers, hors) i -> 
         let op = match op with 
             | Some op -> Some op
             | None -> (match ops.[i] with

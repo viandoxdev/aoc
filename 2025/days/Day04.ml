@@ -25,11 +25,13 @@ let paper_count n g x y =
 
 let remove_accessible_rolls n grid =
     let w, h = dim grid in
-    sum_range 0 (h - 1) (fun y -> 
-        sum_range 0 (w - 1) (fun x -> 
+    range_sum (fun y -> 
+        range_sum (fun x -> 
             if not (is_paper n grid.(x).(y)) then 0 else
             let papers_neighbours = paper_count n grid x y in
-            if papers_neighbours <= 3 then (grid.(x).(y) <- Removed (n + 1); 1) else 0))
+            if papers_neighbours <= 3 then (grid.(x).(y) <- Removed (n + 1); 1) else 0)
+            0 (w - 1))
+        0 (h - 1) 
 
 let solve_part1 grid =
     let grid = copy_grid grid in

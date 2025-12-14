@@ -4,7 +4,7 @@ let digit_to_int c = int_of_char c - int_of_char '0'
 
 let max_digit_index s = 
     let len = String.length s in
-    fold_range_rev (fun (j, m) i -> 
+    range_fold_rev (fun (j, m) i -> 
         let v = digit_to_int s.[i] in
         if v >= m then (i, v) else (j, m)
     ) (0, digit_to_int s.[0]) 0 (len - 1)

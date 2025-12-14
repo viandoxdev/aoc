@@ -15,11 +15,6 @@ let ilog10 x =
     let guess = guesses.(ilog2 x) in
     guess + int_of_bool (x >= powers_of_10.(guess + 1))
 
-let rec sum_range a b f =
-    if a <= b then
-        f a + sum_range (a + 1) b f
-    else 0
-
 let fst3 (a, _, _) = a
 let snd3 (_, b, _) = b
 let thd3 (_, _, c) = c
@@ -28,13 +23,6 @@ let tmap3 f (a, b, c) = (f a, f b, f c)
 let tmap4 f (a, b, c, d) = (f a, f b, f c, f d)
 
 let trim_end_nl s = String.sub s 0 (String.length s - 1)
-
-let rec fold_range f acc range_start range_end =
-    if range_start > range_end then acc else
-    fold_range f (f acc range_start) (range_start + 1) range_end
-let rec fold_range_rev f acc range_start range_end =
-    if range_start > range_end then acc else
-    fold_range_rev f (f acc range_end) range_start (range_end - 1)
 
 let sum = List.fold_left (+) 0
 
@@ -70,7 +58,7 @@ let string_find_index pat s =
     let patlen, len = String.length pat, String.length s in
     let rec aux i j =
         if j = patlen then i - j
-        else if i = len then failwith "Not found"
+        else if i = len then raise Not_found
         else if pat.[j] = s.[i] then aux (i + 1) (j + 1)
         else aux (i + 1) 0
     in
@@ -80,6 +68,12 @@ let string_split_once pat s =
     let patlen, len = String.length pat, String.length s in
     let i = string_find_index pat s in
     (String.sub s 0 i, String.sub s (i + patlen) (len - i - patlen))
+
+let rec string_split pat s =
+    try begin
+        let x, r = string_split_once pat s in
+        x :: string_split pat r
+    end with Not_found -> [s]
 
 let (<%) f g x = f (g x)
 let (%>) f g x = g (f x)
@@ -93,12 +87,25 @@ let transpose = function
 let id x = x
 
 let range a b = List.init (b - a + 1) ((+) a)
-
+let rec range_forall f a b = 
+    a > b || f a && range_forall f (a + 1) b
+let rec range_find f a b =
+    if a <= b then if f a then Some a else range_find f (a + 1) b else None
 let range_pairs a b = 
     range a (b - 1) 
         |> List.(
             concat_map (fun i -> range (i + 1) b 
                 |> map (fun j -> i, j)))
+let rec range_sum f a b =
+    if a <= b then
+        f a + range_sum f (a + 1) b
+    else 0
+let rec range_fold f acc range_start range_end =
+    if range_start > range_end then acc else
+    range_fold f (f acc range_start) (range_start + 1) range_end
+let rec range_fold_rev f acc range_start range_end =
+    if range_start > range_end then acc else
+    range_fold_rev f (f acc range_end) range_start (range_end - 1)
 
 module UnionFind = struct
     type t = {parents: int array; sizes: int array; mutable components: int}

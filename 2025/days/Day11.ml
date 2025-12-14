@@ -10,11 +10,8 @@ let dac = 3
 let fft = 4
 
 let flip_edges edges =
-    let n = Array.length edges in
-    let flipped = Array.make n [] in
-
+    let flipped = Array.map (fun _ -> []) edges in
     Array.iteri (fun i -> List.iter (fun j -> flipped.(j) <- i :: flipped.(j))) edges;
-
     flipped
 
 let parse input =
@@ -25,11 +22,7 @@ let parse input =
         | None -> (let id = Hashtbl.length name_tbl in Hashtbl.add name_tbl name id; id)
     in
 
-    ignore @@ id_of_name "you";
-    ignore @@ id_of_name "out";
-    ignore @@ id_of_name "svr";
-    ignore @@ id_of_name "dac";
-    ignore @@ id_of_name "fft";
+    List.iter (ignore <% id_of_name) ["you"; "out"; "svr"; "dac"; "fft"];
 
     let edges = String.split_on_char '\n' input 
         |> List.map (fun l -> 
