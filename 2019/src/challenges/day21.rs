@@ -1,4 +1,4 @@
-use anyhow::{Context, Result, anyhow};
+use anyhow::{Result, anyhow};
 use itertools::Itertools;
 
 use crate::intcode::Intcode;

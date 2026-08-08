@@ -65,7 +65,7 @@ impl<'a> From<&'a str> for Grid {
                         ] {
                             if let Some(pos) = grid.apply_delta((x, y), delta) {
                                 let char1 = char_at(pos);
-                                if matches!(char1, 'A'..='Z') {
+                                if char1.is_ascii_uppercase() {
                                     let char2 = char_at(grid.apply_delta(pos, delta).unwrap());
 
                                     let key = if flip { [char2, char1] } else { [char1, char2] };
@@ -150,11 +150,11 @@ fn solve_part2(grid: &Grid) -> Result<usize> {
     let mut queue = VecDeque::new();
     let mut visited = vec![vec![0u64; grid.size.0]; grid.size.1];
 
-    fn set_visited(visited: &mut Vec<Vec<u64>>, pos: (usize, usize), level: usize) {
+    fn set_visited(visited: &mut [Vec<u64>], pos: (usize, usize), level: usize) {
         visited[pos.1][pos.0] |= 1 << level
     }
 
-    fn is_visited(visited: &Vec<Vec<u64>>, pos: (usize, usize), level: usize) -> bool {
+    fn is_visited(visited: &[Vec<u64>], pos: (usize, usize), level: usize) -> bool {
         (visited[pos.1][pos.0] & (1 << level)) != 0
     }
 

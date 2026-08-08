@@ -226,14 +226,14 @@ impl Droid {
                     line.chars().filter(|c| c.is_ascii_digit()).collect(),
                 );
                 inf.name = String::new();
-            } else if line.starts_with("- ") {
+            } else if let Some(stripped) = line.strip_prefix("- ") {
                 match state {
                     State::None => return Err(anyhow!("List item outside of item or exits scope")),
                     State::Exits => {
-                        let dir = Direction::try_from(&line[2..])?;
+                        let dir = Direction::try_from(stripped)?;
                         inf.exits[dir as usize] = true;
                     }
-                    State::Items => inf.items.push(line[2..].to_string()),
+                    State::Items => inf.items.push(stripped.to_string()),
                 }
             } else if line.starts_with("You take") {
                 res = CommandFeedback::ItemPickedUp;
@@ -460,6 +460,7 @@ impl Spaceship {
         let mut heavy: Vec<u16> = Vec::new();
 
         for set in subsets {
+            #[allow(clippy::manual_contains)]
             if heavy.iter().any(|&s| set & s == s) {
                 continue;
             }
@@ -475,12 +476,9 @@ impl Spaceship {
             match droid.go(dir)? {
                 CommandFeedback::Finished(pass) => return Ok(pass),
                 CommandFeedback::RoomInformation(CurrentRoomInformation {
-                    pressure_diag: Some(diag),
+                    pressure_diag: Some(Ordering::Less),
                     ..
-                }) => match diag {
-                    Ordering::Less => heavy.push(set),
-                    _ => {}
-                },
+                }) => heavy.push(set),
                 _ => {}
             }
         }

@@ -157,15 +157,14 @@ impl Direction {
     }
 }
 
-impl ToString for Direction {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for Direction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
             Self::Up => "^",
             Self::Right => ">",
             Self::Down => "v",
             Self::Left => "<",
-        }
-        .to_string()
+        })
     }
 }
 
@@ -246,10 +245,9 @@ impl Grid {
 
         let patterns = patterns
             .into_iter()
-            .enumerate()
-            .flat_map(|(_, pats)| {
+            .flat_map(|pats| {
                 pats.into_iter()
-                    .flat_map(move |pats| pats.into_iter().map(move |(count, pat)| (count, pat)))
+                    .flat_map(|pats| pats.into_iter())
             })
             .filter(|&(_, pat)| pattern_length(pat) <= 21)
             .sorted_by_key(|&(count, pat)| -(pat.len() as i32) * (count as i32))

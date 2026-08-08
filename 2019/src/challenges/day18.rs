@@ -366,21 +366,21 @@ impl<const R: usize> KeyGraph<R> {
             key: u8,
             kreqs: &[Option<u8>],
             greqs: &[Option<u8>],
-            cap: usize,
+            _cap: usize,
         ) -> BitSet {
             if let Some(set) = memo[key as usize].as_ref() {
-                return set.clone();
+                return *set;
             }
 
             let mut dependencies = BitSet::empty();
             let mut gate = kreqs[key as usize];
             while let Some(g) = gate {
                 dependencies.insert(g as usize);
-                dependencies.concat(get_key_dependencies(memo, g, kreqs, greqs, cap));
+                dependencies.concat(get_key_dependencies(memo, g, kreqs, greqs, _cap));
                 gate = greqs[g as usize];
             }
 
-            memo[key as usize] = Some(dependencies.clone());
+            memo[key as usize] = Some(dependencies);
             dependencies
         }
 
@@ -429,7 +429,7 @@ impl<const R: usize> KeyGraph<R> {
     fn explore(&self) -> usize {
         // A* on the simplified graph
         let mut queue = BinaryHeap::new();
-        let mut dist = FxHashMap::with_capacity_and_hasher(131071, FxBuildHasher::default());
+        let mut dist = FxHashMap::with_capacity_and_hasher(131071, FxBuildHasher);
 
         let start = State::new(0, [self.count; R], BitSet::empty());
         let start_h = self.heuristic(start);

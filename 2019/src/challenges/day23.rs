@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, default, process::id};
+use std::collections::VecDeque;
 
 use anyhow::Result;
 use itertools::Itertools;
@@ -16,6 +16,7 @@ const IDLE_DELAY: usize = 50;
 const WAKEUP_DELAY: usize = 4;
 
 struct Computer {
+    #[allow(dead_code)]
     address: usize,
     input_queue: VecDeque<i64>,
     program: Intcode<231>,

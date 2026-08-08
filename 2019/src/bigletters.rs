@@ -107,6 +107,7 @@ const fn parse_bitmap(bits: &[bool], buffer: &mut [u32], width: usize) {
     }
 }
 
+#[allow(dead_code)]
 pub fn read_big_letters_string(str: &str, fg: char) -> String {
     let height = str.trim().lines().count();
     debug_assert_eq!(height, 6);

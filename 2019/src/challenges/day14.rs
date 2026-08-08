@@ -10,19 +10,10 @@ fn parse_chemical(s: &str) -> Result<(u64, &str)> {
     Ok((count, name))
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 struct Recipe {
     produces: u64,
     ingredients: Vec<(u64, usize)>,
-}
-
-impl Default for Recipe {
-    fn default() -> Self {
-        Self {
-            produces: 0,
-            ingredients: Vec::new(),
-        }
-    }
 }
 
 impl Recipe {

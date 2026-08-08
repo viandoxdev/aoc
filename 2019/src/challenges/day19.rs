@@ -70,7 +70,7 @@ impl<'a> BeamBoundIter<'a> {
 impl<'a> Iterator for BeamBoundIter<'a> {
     type Item = (i64, i64);
     fn next(&mut self) -> Option<Self::Item> {
-        if self.is_top == !self.beam.is_down {
+        if self.is_top != self.beam.is_down {
             self.step(false);
             if self.is_on() {
                 self.is_lost = false;

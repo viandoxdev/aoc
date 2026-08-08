@@ -99,7 +99,7 @@ pub async fn day12(input: String) -> Result<(String, String)> {
     };
 
     let part1 = {
-        let mut state = state.clone();
+        let mut state = state;
         for _ in 0..1000 {
             state.step();
         }

@@ -1,6 +1,6 @@
 use anyhow::{Result, anyhow};
 use std::{
-    collections::VecDeque, fmt::Debug, io::{BufRead, BufWriter, Read, Write}, str::FromStr
+    collections::VecDeque, fmt::Debug, io::{BufRead, BufWriter, Write}, str::FromStr
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -67,6 +67,7 @@ impl<const VERSION: u8> Intcode<VERSION> {
         }
     }
 
+    #[allow(dead_code)]
     fn param_disassemble(&self, ip: usize, ins: i64, off: usize) -> String {
         match Self::mode(ins, off as u8) {
             // Position mode
@@ -239,6 +240,7 @@ impl<const VERSION: u8> Intcode<VERSION> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn disassemble(&self, colors: bool) -> Result<String> {
         let mut writer = BufWriter::new(Vec::new());
 
@@ -403,6 +405,7 @@ impl<const VERSION: u8> Intcode<VERSION> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn run_interactive(&mut self) -> Result<()> {
         let mut stdin = std::io::stdin().lock();
         let mut stdout = std::io::stdout().lock();
