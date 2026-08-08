@@ -1,7 +1,6 @@
 use anyhow::{Result, anyhow};
 use std::{
-    io::{BufWriter, Write},
-    str::FromStr,
+    collections::VecDeque, fmt::Debug, io::{BufRead, BufWriter, Read, Write}, str::FromStr
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -14,11 +13,17 @@ pub enum ProgramState {
 }
 
 // Version: <day number><day part> (i.e: Day 5 part 2 is 52)
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Intcode<const VERSION: u8> {
     pub program: Vec<i64>,
     instruction_pointer: i64,
     base_pointer: i64,
+}
+
+impl<const VERSION: u8> Debug for Intcode<VERSION> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "<Intcode v{VERSION}: {} ints>", self.program.len())
+    }
 }
 
 pub fn parse_int_list(s: &str) -> Result<Vec<i64>, std::num::ParseIntError> {
@@ -398,6 +403,44 @@ impl<const VERSION: u8> Intcode<VERSION> {
         }
     }
 
+    pub fn run_interactive(&mut self) -> Result<()> {
+        let mut stdin = std::io::stdin().lock();
+        let mut stdout = std::io::stdout().lock();
+        let mut queue: VecDeque<u8> = VecDeque::new();
+
+        loop {
+            match self.step(queue.front().map(|&b| b as i64))? {
+                ProgramState::Running => {}
+                ProgramState::Finished => break,
+                ProgramState::ConsumedInput => {
+                    queue.pop_front();
+                }
+                ProgramState::AwaitingInput => {
+                    stdout.flush()?;
+
+                    let mut line = String::new();
+                    if stdin.read_line(&mut line)? == 0 {
+                        break;
+                    }
+                    if line.contains(":") {
+                        return Ok(());
+                    }
+
+                    queue.extend(line.bytes().filter(|&b| b != b'\r'));
+                }
+                ProgramState::PendingOutput(out) => {
+                    if out <= 127 {
+                        stdout.write_all(&[out as u8])?;
+                    } else {
+                        print!("<{out}>");
+                    }
+                }
+            }
+        }
+
+        stdout.flush()?;
+        Ok(())
+    }
     // Run program until halts
     pub fn run(&mut self, mut input: &[i64]) -> Result<Vec<i64>> {
         let mut output = Vec::new();

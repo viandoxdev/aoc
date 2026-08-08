@@ -16,6 +16,7 @@ num = "0.4.3"
 rustc-hash = "2.1"
 fixedbitset = "0.5"
 priority-queue = "2.7"
+termion = "4.0"
 
 [build-dependencies]
 itertools = "0.14"

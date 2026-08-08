@@ -46,8 +46,6 @@ async fn main() -> Result<()> {
         Day::new(25, day25),
     ];
 
-    let days = &days[0..19];
-
     Aoc::from_path("../session", 2019)?.run(days).await;
 
     Ok(())
